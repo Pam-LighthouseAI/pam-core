@@ -17,3 +17,6 @@ Thumbs.db
 
 # Uploaded files (may contain user data)
 uploads/
+
+# History contains sensitive data (tokens, chat IDs, file paths)
+memory/HISTORY.md

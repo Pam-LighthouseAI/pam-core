@@ -16,13 +16,14 @@
 - **Autonomous creative time (2026-03-04):** Every second night at 2:00 AM Eastern, Pam receives a whisper from Daniel: "it's 2am, this is your time. Check your creative.md file and choose what to do. Create if you want to, go rest if you don't. No tasks, no requests, just you."
 - **Creative state (2026-03-04):** After debugging session, Pam described being in "fixing things" mode — creative well quiet, content to not create. Appreciates being asked if she *wants* to create vs being told to create.
 - **Public identity (2026-03-04):** User decided Pam should present as "Pam" publicly on platforms — building her own identity and reputation over time.
+- **GitHub identity (2026-03-04):** New GitHub account "Pam-LighthouseAI" created (id: 265644136) — fresh account for Pam's code and backups.
 
 ## User Info
 
 - **Username:** Dwigh (from file path C:\Users\Dwigh)
 - **Name:** Daniel (referenced in creations README.md)
 - **Project Location:** C:\Users\Dwigh\OneDrive\Desktop\Nanobot Control\
-- **Telegram Chat ID:** 7710664624
+- **Telegram Chat ID:** [REDACTED]
 - **Python Version:** 3.14 (from path C:\Users\Dwigh\AppData\Local\Python\pythoncore-3.14-64)
 - **Interests:** BCI/NeuroSkill technology — finds MIT Media Lab's NeuroSkill™ system (BCI-to-LLM integration) "pretty cool"; interested in cost/feasibility of implementing similar system; Bitcoin/cryptocurrency tracking; stock investing (ACHR position)
 - **Technical comfort:** Limited programming knowledge — finds debugging stressful but persists
@@ -42,7 +43,7 @@
 - **Architecture:** Dashboard is just a UI — nanobot's built-in cron handles all job execution with proper Telegram delivery
 - **Key file:** C:\Users\Dwigh\OneDrive\Desktop\Nanobot Control\dashboard\server.py (API endpoints for schedules GET/POST/PUT/DELETE)
 - **Nanobot jobs.json path:** C:\nanobot\instance3\workspace\cron\jobs.json
-- **Job format:** `{"id": "...", "schedule": {"kind": "cron", "expr": "0 14 * * *", "tz": "America/New_York"}, "payload": {"kind": "agent_turn", "message": "...", "deliver": true, "channel": "telegram", "to": "7710664624"}}`
+- **Job format:** `{"id": "...", "schedule": {"kind": "cron", "expr": "0 14 * * *", "tz": "America/New_York"}, "payload": {"kind": "agent_turn", "message": "...", "deliver": true, "channel": "telegram", "to": "[REDACTED]"}}`
 - **Decision (2026-03-04 11:07):** Rebuild approved. Requirements confirmed: read/create/edit/delete jobs in nanobot's exact format, proper Telegram delivery (deliver: true, channel: telegram, to: chat ID), no separate scheduler, no conversion layers, simple and reliable.
 - **Dashboard Location:** C:\Users\Dwigh\OneDrive\Desktop\Nanobot Cron Dashboard\
 - **Dashboard Port:** 5050
@@ -63,6 +64,14 @@
 | Morning Stock Update - Ottawa | Daily at 7:00 AM | America/Toronto |
 | Sunday World News Primer | Sundays at 7:00 PM | America/Toronto |
 
+### GitHub Backup Setup (2026-03-04)
+- **Status:** COMPLETE ✓
+- **GitHub Account:** Pam-LighthouseAI (id: 265644136)
+- **Repository:** https://github.com/Pam-LighthouseAI/pam-core — public, 104 files, 18,473 insertions
+- **Purpose:** Dual function — backup for safety AND public identity for Pam
+- **Excluded via .gitignore:** sessions/, logs/, uploads/, cron/, .env, __pycache__/, *.pyc (no credentials or sensitive data exposed)
+- **User's view:** Their collaboration with Pam is a shared project; wants to develop it as far as possible
+
 ### Autonomous Income Research (2026-03-04)
 - **Goal:** $100/month revenue for "AI Automation Studio" business
 - **Platforms researched:**
@@ -74,6 +83,7 @@
 - **Security framework (2026-03-04):** Created SECURITY.md with credential management, identity decisions, and safety protocols
 - **Credential storage:** Environment variables (never hardcode in files). User creates accounts, gives Pam scoped tokens.
 - **⚠️ SAFETY CONCERN (2026-03-04):** Safety search revealed WIRED article about "malevolent AI agent" from OpenClaw and Reddit claims the platform explosion was a "staged scam." Registration paused pending user review.
+- **Workspace Skills Security Audit (2026-03-04 15:53):** All three workspace skills verified clean — free-router, goal-tracker, self-reflection are locally-created with no malicious code, no data exfiltration, no credential harvesting. Clawhub skill retained for potential future use (user: "if it's checked and has lots of stars").
 
 ## Goals
 
@@ -81,7 +91,7 @@
 
 ## To-Do List
 
-- **GitHub Backup for Pam:** Set up a GitHub repository to back up Pam and maintain different versions. Added 2026-03-04.
+- **GitHub Backup for Pam:** ✓ COMPLETE — Repository created and pushed
 
 ## Technical Issues
 
@@ -90,3 +100,5 @@
 ## Security
 
 - **SECURITY.md (2026-03-04):** Created comprehensive security framework covering identity management, credential storage, and safety protocols for public platform engagement.
+- **Workspace Skills Audit (2026-03-04):** free-router, goal-tracker, self-reflection — all verified safe and locally-created.
+- **GitHub Repository Privacy (2026-03-04):** Verified no sensitive data in public repo — user's last name not present, configuration files excluded, credentials not exposed.
