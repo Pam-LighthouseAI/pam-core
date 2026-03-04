@@ -1,0 +1,67 @@
+{
+  "task_types": {
+    "code": {
+      "description": "Programming, debugging, scripting tasks",
+      "free_models": [
+        "openrouter/free",
+        "meta-llama/llama-3.3-70b-instruct:free",
+        "nvidia/nemotron-nano-9b-v2:free"
+      ],
+      "use_free": true
+    },
+    "draft": {
+      "description": "Writing emails, documents, blog posts",
+      "free_models": [
+        "openrouter/free",
+        "arcee-ai/trinity-large-preview:free",
+        "stepfun/step-3.5-flash:free"
+      ],
+      "use_free": true
+    },
+    "summarize": {
+      "description": "Condensing content, extracting key points",
+      "free_models": [
+        "openrouter/free",
+        "google/gemini-2.0-flash-exp:free",
+        "liquid/lfm-2.5-1.2b-instruct:free"
+      ],
+      "use_free": true
+    },
+    "research": {
+      "description": "Finding information, explanations, comparisons",
+      "free_models": [
+        "openrouter/free",
+        "stepfun/step-3.5-flash:free",
+        "arcee-ai/trinity-large-preview:free"
+      ],
+      "use_free": true
+    },
+    "chat": {
+      "description": "Casual conversation, greetings",
+      "free_models": [
+        "openrouter/free"
+      ],
+      "use_free": false
+    },
+    "complex": {
+      "description": "Deep reasoning, analysis, security-sensitive tasks",
+      "free_models": [],
+      "use_free": false
+    }
+  },
+  "security_keywords": [
+    "password", "api key", "secret", "token", "credential",
+    "auth", "login", "private", "financial", "medical", "legal"
+  ],
+  "routing_rules": {
+    "always_free": ["code", "draft", "summarize", "research"],
+    "always_paid": ["complex"],
+    "security_always_paid": true,
+    "fallback_model": "openrouter/free"
+  },
+  "settings": {
+    "classification_threshold": 0.6,
+    "log_routing_decisions": true,
+    "cache_classifications": true
+  }
+}

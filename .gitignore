@@ -1,0 +1,19 @@
+# Sensitive data
+cron/jobs.json
+sessions/
+logs/
+__pycache__/
+*.pyc
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+
+# Uploaded files (may contain user data)
+uploads/

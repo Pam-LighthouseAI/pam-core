@@ -1,0 +1,1 @@
+Attempted to scrape Best Buy for the 50 most expensive laptops. Encountered site restrictions that prevented retrieving a full list. No data was extracted.

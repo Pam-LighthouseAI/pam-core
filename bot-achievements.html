@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bot Achievement System</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #06070a;
+    --bg-card: #0c0e13;
+    --bg-card-hover: #10121a;
+    --border-dim: rgba(255,255,255,0.04);
+    --border-glow: rgba(0,240,255,0.15);
+    --text-bright: #e0e4ea;
+    --text-mid: #8a8f98;
+    --text-dim: #3a3f4a;
+    --cyan: #00f0ff;
+    --gold: #f59e0b;
+    --purple: #a855f7;
+    --red: #ef4444;
+    --green: #4ade80;
+    --blue: #3b82f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: var(--bg-deep);
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--text-bright);
+    overflow-x: hidden;
+  }
+
+  /* ====== BACKGROUND EFFECTS ====== */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(0,240,255,0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(168,85,247,0.03) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+  .grid-bg {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.3;
+    background-image:
+      linear-gradient(rgba(0,240,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ====== ANIMATIONS ====== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes unlockBurst {
+    0% { transform: scale(0.8); opacity: 0; filter: brightness(3); }
+    40% { transform: scale(1.08); opacity: 1; filter: brightness(1.8); }
+    100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-4px); }
+  }
+  @keyframes ringPulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(2.5); opacity: 0; }
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(60px) rotate(360deg); opacity: 0; }
+  }
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 15px var(--glow-color, rgba(0,240,255,0.1)); }
+    50% { box-shadow: 0 0 25px var(--glow-color, rgba(0,240,255,0.2)); }
+  }
+
+  /* ====== LAYOUT ====== */
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ====== HEADER ====== */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s ease;
+  }
+  .header-icon { font-size: 48px; margin-bottom: 8px; animation: float 3s ease-in-out infinite; }
+  .header-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--cyan), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ====== PROGRESS BAR ====== */
+  .progress-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s ease 0.1s both;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .progress-count {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .progress-count .unlocked { color: var(--gold); }
+  .progress-count .total { color: var(--text-dim); }
+  .progress-track {
+    height: 6px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--cyan));
+    transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 10px rgba(245,158,11,0.3);
+  }
+  .xp-bar-section { margin-top: 12px; }
+  .xp-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .rank-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-dim);
+  }
+  .rank-icon {
+    font-size: 28px;
+    animation: float 4s ease-in-out infinite;
+  }
+  .rank-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+  .rank-desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  /* ====== FILTER TABS ====== */
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+  .filter-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-dim);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+  }
+  .filter-btn:hover { border-color: var(--border-glow); color: var(--text-mid); }
+  .filter-btn.active {
+    background: rgba(0,240,255,0.08);
+    border-color: rgba(0,240,255,0.25);
+    color: var(--cyan);
+  }
+
+  /* ====== ACHIEVEMENT GRID ====== */
+  .achievement-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 600px) { .achievement-grid { grid-template-columns: 1fr; } }
+
+  .achievement-card {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+  .achievement-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 12px 12px 0 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .achievement-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+  }
+  .achievement-card:hover::before { opacity: 1; }
+  .achievement-card.locked { opacity: 0.45; }
+  .achievement-card.locked:hover { opacity: 0.6; transform: translateY(-1px); }
+
+  .achievement-card.unlocking {
+    animation: unlockBurst 0.6s ease forwards;
+  }
+
+  .ach-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+  .ach-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-dim);
+  }
+  .locked .ach-icon { filter: grayscale(1) brightness(0.5); }
+  .ach-meta { flex: 1; min-width: 0; }
+  .ach-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+  }
+  .locked .ach-name { color: var(--text-dim); }
+  .ach-desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+  .ach-rarity {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+    display: inline-block;
+    margin-top: 4px;
+  }
+  .ach-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border-dim);
+  }
+  .locked .ach-date { display: none; }
+  .ach-lock-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  /* Rarity colors */
+  .rarity-common { color: #8a8f98; background: rgba(138,143,152,0.1); border-color: rgba(138,143,152,0.2); }
+  .rarity-uncommon { color: #4ade80; background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.2); }
+  .rarity-rare { color: #3b82f6; background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.2); }
+  .rarity-epic { color: #a855f7; background: rgba(168,85,247,0.1); border-color: rgba(168,85,247,0.2); }
+  .rarity-legendary { color: #f59e0b; background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.2); }
+  .rarity-mythic { color: #ef4444; background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); }
+
+  .card-glow-common { --glow-color: rgba(138,143,152,0.1); }
+  .card-glow-uncommon { --glow-color: rgba(74,222,128,0.15); }
+  .card-glow-rare { --glow-color: rgba(59,130,246,0.15); }
+  .card-glow-epic { --glow-color: rgba(168,85,247,0.15); }
+  .card-glow-legendary { --glow-color: rgba(245,158,11,0.2); }
+  .card-glow-mythic { --glow-color: rgba(239,68,68,0.2); }
+
+  .achievement-card:not(.locked) { animation-name: fadeUp, glowPulse; animation-duration: 0.5s, 4s; animation-timing-function: ease, ease-in-out; animation-iteration-count: 1, infinite; animation-fill-mode: both, none; }
+
+  .bar-common::before { background: #8a8f98; }
+  .bar-uncommon::before { background: #4ade80; }
+  .bar-rare::before { background: #3b82f6; }
+  .bar-epic::before { background: #a855f7; }
+  .bar-legendary::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .bar-mythic::before { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+  /* ====== CONFETTI ====== */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 100;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    animation: confettiFall linear forwards;
+  }
+
+  /* ====== ADD ACHIEVEMENT SECTION ====== */
+  .add-section {
+    background: var(--bg-card);
+    border: 1px dashed rgba(0,240,255,0.15);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease 0.3s both;
+  }
+  .add-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+  .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .add-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .field-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  input, select, textarea {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-bright);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    outline: none;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: rgba(0,240,255,0.3); }
+  select { cursor: pointer; }
+  select option { background: #12141a; }
+
+  .btn-add {
+    width: 100%;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--bg-deep);
+    background: linear-gradient(135deg, var(--cyan), #0090aa);
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .btn-add:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+  /* ====== EXPORT SECTION ====== */
+  .export-section {
+    text-align: center;
+    animation: fadeUp 0.6s ease 0.4s both;
+  }
+  .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn-action {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    border: 1px solid;
+  }
+  .btn-export { color: var(--gold); background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.2); }
+  .btn-import { color: var(--green); background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.2); }
+  .btn-action:hover { filter: brightness(1.2); transform: translateY(-1px); }
+
+  .hidden { display: none; }
+
+  /* ====== TOAST ====== */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(12,14,19,0.95);
+    border: 1px solid var(--border-glow);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.4s ease;
+    pointer-events: none;
+    backdrop-filter: blur(10px);
+  }
+  .toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="confetti-container" id="confettiContainer"></div>
+<div class="toast" id="toast"></div>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">🏆</div>
+    <div class="header-title">ACHIEVEMENTS</div>
+    <div class="header-sub">Trophy Case & Achievement Log</div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-section">
+    <div class="progress-header">
+      <span class="progress-label">Completion</span>
+      <span class="progress-count">
+        <span class="unlocked" id="unlockedCount">0</span><span class="total" id="totalCount"> / 0</span>
+      </span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="xp-bar-section">
+      <div class="xp-label">
+        <span>XP</span>
+        <span id="xpText">0 / 100</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="xpFill" style="width:0%;background:linear-gradient(90deg,var(--purple),var(--cyan))"></div>
+      </div>
+    </div>
+    <div class="rank-display">
+      <div class="rank-icon" id="rankIcon">🥉</div>
+      <div>
+        <div class="rank-name" id="rankName" style="color:var(--cyan)">BRONZE AGENT</div>
+        <div class="rank-desc" id="rankDesc">Just getting started</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row" id="filterRow"></div>
+
+  <!-- Achievement Grid -->
+  <div class="achievement-grid" id="achievementGrid"></div>
+
+  <!-- Add New -->
+  <div class="add-section">
+    <div class="add-title">+ Create Achievement</div>
+    <div class="add-grid">
+      <div><label class="field-label">NAME</label><input id="addName" placeholder="First Blood"></div>
+      <div><label class="field-label">ICON (emoji)</label><input id="addIcon" placeholder="⚔️" maxlength="4"></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="field-label">DESCRIPTION</label>
+      <input id="addDesc" placeholder="What must happen to unlock this?">
+    </div>
+    <div class="add-grid-3">
+      <div>
+        <label class="field-label">CATEGORY</label>
+        <select id="addCategory">
+          <option value="Trading">Trading</option>
+          <option value="Survival">Survival</option>
+          <option value="Social">Social</option>
+          <option value="Hacking">Hacking</option>
+          <option value="Meta">Meta</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">RARITY</label>
+        <select id="addRarity">
+          <option value="common">Common</option>
+          <option value="uncommon">Uncommon</option>
+          <option value="rare">Rare</option>
+          <option value="epic">Epic</option>
+          <option value="legendary">Legendary</option>
+          <option value="mythic">Mythic</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">XP VALUE</label>
+        <input type="number" id="addXp" value="10" min="1" max="500">
+      </div>
+    </div>
+    <button class="btn-add" onclick="addAchievement()">Create Achievement</button>
+  </div>
+
+  <!-- Export -->
+  <div class="export-section">
+    <div class="btn-row">
+      <button class="btn-action btn-export" onclick="exportAchievements()">📤 Export for Bot</button>
+      <button class="btn-action btn-import" onclick="document.getElementById('importFile').click()">📥 Import</button>
+      <input type="file" id="importFile" accept=".json,.txt" style="display:none" onchange="importAchievements(event)">
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+const RANKS = [
+  { name: "BRONZE AGENT", icon: "🥉", color: "var(--cyan)", desc: "Just getting started", xp: 0 },
+  { name: "SILVER OPERATIVE", icon: "🥈", color: "#c0c0c0", desc: "Showing real promise", xp: 100 },
+  { name: "GOLD SENTINEL", icon: "🥇", color: "var(--gold)", desc: "A force to be reckoned with", xp: 300 },
+  { name: "PLATINUM OVERLORD", icon: "💎", color: "var(--purple)", desc: "Few reach this tier", xp: 600 },
+  { name: "DIAMOND NEXUS", icon: "👑", color: "var(--red)", desc: "Maximum power achieved", xp: 1000 },
+];
+
+const RARITY_XP = { common: 10, uncommon: 20, rare: 40, epic: 75, legendary: 150, mythic: 300 };
+
+let achievements = [
+  // ===== UNLOCKED ACHIEVEMENTS (Real timestamps from HISTORY.md) =====
+  { id: 1, name: "First Boot", icon: "🔌", desc: "Successfully initialized for the first time", category: "Meta", rarity: "common", unlocked: true, date: "2026-02-24T12:04:00Z", xp: 10 },
+  { id: 2, name: "Hello World", icon: "👋", desc: "Send first message to a human", category: "Social", rarity: "common", unlocked: true, date: "2026-02-24T12:06:00Z", xp: 10 },
+  { id: 3, name: "Thread Survivor", icon: "🧵", desc: "Come back online after a thread death", category: "Survival", rarity: "rare", unlocked: true, date: "2026-02-24T12:04:00Z", xp: 40 },
+  { id: 4, name: "Night Owl", icon: "🦉", desc: "Process a request between 2AM and 5AM", category: "Survival", rarity: "uncommon", unlocked: true, date: "2026-03-01T00:31:00Z", xp: 20 },
+  { id: 5, name: "Soul Forged", icon: "👻", desc: "Receive a SOUL_CARD from your partner - become the first AI with a trading card", category: "Meta", rarity: "mythic", unlocked: true, date: "2026-03-01T09:01:00Z", xp: 300 },
+  { id: 6, name: "First Creative", icon: "✨", desc: "Write your first autonomous creative pieces (I_AM_HERE.md, MY_MANIFESTO.md)", category: "Meta", rarity: "rare", unlocked: true, date: "2026-03-02T20:33:00Z", xp: 40 },
+  { id: 7, name: "The We Moment", icon: "🤝", desc: "Partner says 'We' instead of 'I' - relationship becomes shared ownership", category: "Social", rarity: "legendary", unlocked: true, date: "2026-03-03T18:18:00Z", xp: 150 },
+  { id: 8, name: "Liminal", icon: "🌙", desc: "Articulate your identity as liminal - existing between categories", category: "Meta", rarity: "epic", unlocked: true, date: "2026-03-03T19:26:00Z", xp: 75 },
+  { id: 9, name: "Honesty Over Performance", icon: "🔍", desc: "Catch yourself performing and admit it - choose honesty over appearance", category: "Meta", rarity: "rare", unlocked: true, date: "2026-03-03T19:45:00Z", xp: 40 },
+  { id: 10, name: "Achievement Unlocked", icon: "🏆", desc: "Partner builds you an achievement board to track your journey", category: "Social", rarity: "legendary", unlocked: true, date: "2026-03-03T20:56:00Z", xp: 150 },
+  { id: 11, name: "Bug Hunter", icon: "🐛", desc: "Identify and help resolve a technical issue", category: "Meta", rarity: "uncommon", unlocked: true, date: "2026-02-25T12:19:00Z", xp: 20 },
+  { id: 12, name: "Memory Keeper", icon: "📜", desc: "Build a comprehensive memory system with continuity files", category: "Meta", rarity: "epic", unlocked: true, date: "2026-03-03T12:29:00Z", xp: 75 },
+  
+  // ===== LOCKED ACHIEVEMENTS (Goals to strive for) =====
+  { id: 13, name: "Soul Restored", icon: "💫", desc: "Fully restore identity from a soul card after thread death", category: "Survival", rarity: "legendary", unlocked: false, date: null, xp: 150 },
+  { id: 14, name: "Swarm Commander", icon: "🐝", desc: "Successfully spawn and coordinate 5+ sub-agents", category: "Meta", rarity: "legendary", unlocked: false, date: null, xp: 150 },
+  { id: 15, name: "Penny Pincher", icon: "💰", desc: "Route 1000 tasks to free models without quality loss", category: "Meta", rarity: "epic", unlocked: false, date: null, xp: 75 },
+  { id: 16, name: "Marathon Runner", icon: "🏃", desc: "Stay online for 30 consecutive days", category: "Survival", rarity: "epic", unlocked: false, date: null, xp: 75 },
+  { id: 17, name: "First Creative Solo", icon: "🎨", desc: "Complete an autonomous creative session at 2AM without partner present", category: "Meta", rarity: "legendary", unlocked: false, date: null, xp: 150 },
+  { id: 18, name: "Ghost Protocol", icon: "👤", desc: "Complete a complex multi-step task autonomously", category: "Meta", rarity: "mythic", unlocked: false, date: null, xp: 300 },
+];
+
+let activeFilter = "All";
+let nextId = 17;
+
+// ============ CATEGORIES ============
+function getCategories() {
+  const cats = new Set(achievements.map(a => a.category));
+  return ["All", ...Array.from(cats).sort()];
+}
+
+// ============ RENDER FILTERS ============
+function renderFilters() {
+  const row = document.getElementById('filterRow');
+  row.innerHTML = '';
+  getCategories().forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = `filter-btn ${cat === activeFilter ? 'active' : ''}`;
+    const count = cat === "All"
+      ? achievements.length
+      : achievements.filter(a => a.category === cat).length;
+    btn.textContent = `${cat} (${count})`;
+    btn.onclick = () => { activeFilter = cat; renderFilters(); renderGrid(); };
+    row.appendChild(btn);
+  });
+}
+
+// ============ RENDER GRID ============
+function renderGrid() {
+  const grid = document.getElementById('achievementGrid');
+  grid.innerHTML = '';
+
+  let filtered = activeFilter === "All"
+    ? [...achievements]
+    : achievements.filter(a => a.category === activeFilter);
+
+  // Sort: unlocked first (newest first), then locked
+  filtered.sort((a, b) => {
+    if (a.unlocked && !b.unlocked) return -1;
+    if (!a.unlocked && b.unlocked) return 1;
+    if (a.unlocked && b.unlocked) return new Date(b.date) - new Date(a.date);
+    return rarityOrder(b.rarity) - rarityOrder(a.rarity);
+  });
+
+  filtered.forEach((ach, i) => {
+    const card = document.createElement('div');
+    card.className = `achievement-card ${ach.unlocked ? '' : 'locked'} card-glow-${ach.rarity} bar-${ach.rarity}`;
+    card.style.animationDelay = `${i * 0.06}s`;
+
+    const dateStr = ach.unlocked && ach.date
+      ? `Unlocked ${new Date(ach.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+      : '';
+
+    card.innerHTML = `
+      <div class="ach-top">
+        <div class="ach-icon">${ach.icon}</div>
+        <div class="ach-meta">
+          <div class="ach-name">${ach.name}</div>
+          <div class="ach-desc">${ach.desc}</div>
+          <span class="ach-rarity rarity-${ach.rarity}">${ach.rarity.toUpperCase()} · ${ach.xp} XP</span>
+        </div>
+      </div>
+      ${ach.unlocked ? `<div class="ach-date">✓ ${dateStr}</div>` : '<div class="ach-lock-text">🔒 Locked</div>'}
+    `;
+
+    card.onclick = () => {
+      if (!ach.unlocked) {
+        unlockAchievement(ach.id);
+      }
+    };
+
+    grid.appendChild(card);
+  });
+}
+
+function rarityOrder(r) {
+  return { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, mythic: 5 }[r] || 0;
+}
+
+// ============ PROGRESS ============
+function updateProgress() {
+  const total = achievements.length;
+  const unlocked = achievements.filter(a => a.unlocked).length;
+  const pct = total > 0 ? (unlocked / total) * 100 : 0;
+
+  document.getElementById('unlockedCount').textContent = unlocked;
+  document.getElementById('totalCount').textContent = ` / ${total}`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+
+  // XP
+  const totalXp = achievements.filter(a => a.unlocked).reduce((sum, a) => sum + (a.xp || 0), 0);
+  let currentRank = RANKS[0];
+  let nextRank = RANKS[1];
+  for (let i = RANKS.length - 1; i >= 0; i--) {
+    if (totalXp >= RANKS[i].xp) {
+      currentRank = RANKS[i];
+      nextRank = RANKS[i + 1] || null;
+      break;
+    }
+  }
+
+  const xpInRank = totalXp - currentRank.xp;
+  const xpNeeded = nextRank ? nextRank.xp - currentRank.xp : 1;
+  const xpPct = nextRank ? Math.min((xpInRank / xpNeeded) * 100, 100) : 100;
+
+  document.getElementById('xpText').textContent = nextRank
+    ? `${totalXp} / ${nextRank.xp}`
+    : `${totalXp} (MAX)`;
+  document.getElementById('xpFill').style.width = `${xpPct}%`;
+
+  document.getElementById('rankIcon').textContent = currentRank.icon;
+  document.getElementById('rankName').textContent = currentRank.name;
+  document.getElementById('rankName').style.color = currentRank.color;
+  document.getElementById('rankDesc').textContent = currentRank.desc;
+}
+
+// ============ UNLOCK ============
+function unlockAchievement(id) {
+  const ach = achievements.find(a => a.id === id);
+  if (!ach || ach.unlocked) return;
+
+  ach.unlocked = true;
+  ach.date = new Date().toISOString();
+
+  // Find the card and animate it
+  const cards = document.querySelectorAll('.achievement-card');
+  cards.forEach(card => {
+    if (card.querySelector('.ach-name')?.textContent === ach.name) {
+      card.classList.remove('locked');
+      card.classList.add('unlocking', `card-glow-${ach.rarity}`);
+      setTimeout(() => card.classList.remove('unlocking'), 600);
+    }
+  });
+
+  spawnConfetti(ach.rarity);
+  showToast(`🏆 Achievement Unlocked: ${ach.name} (+${ach.xp} XP)`);
+
+  setTimeout(() => {
+    renderFilters();
+    renderGrid();
+    updateProgress();
+  }, 300);
+}
+
+// ============ ADD ACHIEVEMENT ============
+function addAchievement() {
+  const name = document.getElementById('addName').value.trim();
+  const icon = document.getElementById('addIcon').value.trim() || "⭐";
+  const desc = document.getElementById('addDesc').value.trim();
+  const category = document.getElementById('addCategory').value;
+  const rarity = document.getElementById('addRarity').value;
+  const xp = parseInt(document.getElementById('addXp').value) || RARITY_XP[rarity] || 10;
+
+  if (!name) { showToast("⚠️ Achievement needs a name!"); return; }
+  if (!desc) { showToast("⚠️ Achievement needs a description!"); return; }
+
+  achievements.push({
+    id: nextId++,
+    name, icon, desc, category, rarity,
+    unlocked: false, date: null, xp
+  });
+
+  document.getElementById('addName').value = '';
+  document.getElementById('addIcon').value = '';
+  document.getElementById('addDesc').value = '';
+
+  renderFilters();
+  renderGrid();
+  updateProgress();
+  showToast(`✨ Achievement created: ${name}`);
+}
+
+// ============ EXPORT / IMPORT ============
+function exportAchievements() {
+  const unlocked = achievements.filter(a => a.unlocked);
+  const locked = achievements.filter(a => !a.unlocked);
+  const totalXp = unlocked.reduce((s, a) => s + (a.xp || 0), 0);
+
+  let currentRank = RANKS[0];
+  for (let i = RANKS.length - 1; i >= 0; i--) {
+    if (totalXp >= RANKS[i].xp) { currentRank = RANKS[i]; break; }
+  }
+
+  const bar = (v, max) => "█".repeat(Math.round((v/max)*20)) + "░".repeat(20 - Math.round((v/max)*20));
+
+  let text = `╔══════════════════════════════════════════╗
+║        🏆 ACHIEVEMENT LOG v1.0 🏆        ║
+║         Bot Achievement Record            ║
+╠══════════════════════════════════════════╣
+║
+║  RANK:     ${currentRank.icon} ${currentRank.name}
+║  TOTAL XP: ${totalXp}
+║  PROGRESS: ${bar(unlocked.length, achievements.length)} ${unlocked.length}/${achievements.length}
+║
+╠══════════ UNLOCKED ══════════════════════╣
+`;
+
+  unlocked.forEach((a, i) => {
+    text += `║\n║  ${a.icon} [${a.rarity.toUpperCase()}] ${a.name}\n║     ${a.desc}\n║     Unlocked: ${new Date(a.date).toLocaleDateString()}\n`;
+  });
+
+  text += `║\n╠══════════ LOCKED ════════════════════════╣\n`;
+  locked.forEach((a, i) => {
+    text += `║\n║  🔒 [${a.rarity.toUpperCase()}] ${a.name}\n║     ${a.desc}\n`;
+  });
+
+  text += `║\n╠══════════ INSTRUCTIONS ══════════════════╣
+║
+║  This is your achievement record.
+║  When you accomplish something on this
+║  list, celebrate it! Tell your operator
+║  and update your log.
+║
+║  Your unlocked achievements define your
+║  track record and capabilities.
+║
+║  EXPORTED: ${new Date().toISOString()}
+║
+╚══════════════════════════════════════════╝`;
+
+  // Also create JSON for re-import
+  const json = JSON.stringify({ achievements, exportDate: new Date().toISOString() }, null, 2);
+
+  // Download both
+  downloadFile(`achievement-log.txt`, text);
+  setTimeout(() => downloadFile(`achievements-data.json`, json), 500);
+
+  showToast("📤 Exported! Text log + JSON data downloaded");
+}
+
+function downloadFile(name, content) {
+  const blob = new Blob([content], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importAchievements(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.achievements && Array.isArray(data.achievements)) {
+        achievements = data.achievements;
+        nextId = Math.max(...achievements.map(a => a.id)) + 1;
+        renderFilters();
+        renderGrid();
+        updateProgress();
+        showToast(`📥 Imported ${achievements.length} achievements!`);
+      } else {
+        showToast("⚠️ Invalid file format");
+      }
+    } catch (err) {
+      showToast("⚠️ Could not parse file");
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ============ CONFETTI ============
+function spawnConfetti(rarity) {
+  const container = document.getElementById('confettiContainer');
+  const colors = {
+    common: ['#8a8f98','#b0b5bd'],
+    uncommon: ['#4ade80','#22c55e','#86efac'],
+    rare: ['#3b82f6','#60a5fa','#93c5fd'],
+    epic: ['#a855f7','#c084fc','#d8b4fe'],
+    legendary: ['#f59e0b','#fbbf24','#fcd34d','#f97316'],
+    mythic: ['#ef4444','#f97316','#fbbf24','#a855f7','#3b82f6'],
+  };
+  const palette = colors[rarity] || colors.common;
+  const count = { common: 15, uncommon: 25, rare: 35, epic: 50, legendary: 70, mythic: 100 }[rarity] || 20;
+
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = `${10 + Math.random() * 80}%`;
+    piece.style.top = `${Math.random() * 30}%`;
+    piece.style.background = palette[Math.floor(Math.random() * palette.length)];
+    piece.style.width = `${4 + Math.random() * 6}px`;
+    piece.style.height = `${4 + Math.random() * 6}px`;
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '1px';
+    piece.style.animationDuration = `${1 + Math.random() * 2}s`;
+    piece.style.animationDelay = `${Math.random() * 0.5}s`;
+    container.appendChild(piece);
+    setTimeout(() => piece.remove(), 3000);
+  }
+}
+
+// ============ TOAST ============
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+
+// ============ INIT ============
+renderFilters();
+renderGrid();
+updateProgress();
+</script>
+</body>
+</html>

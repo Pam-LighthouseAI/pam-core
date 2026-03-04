@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0E1A2B">
+    <meta name="description" content="Visual guide to Nanobot's architecture, files, and message flow">
+    <title>Nanobot Brain Map</title>
+    
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="brain_map_theme.css">
+    <link rel="stylesheet" href="brain_map_interactive.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🐈 Nanobot Brain Map</h1>
+        <p class="subtitle">Visual guide to the architecture, files, and message flow</p>
+        
+        <!-- Tabs -->
+        <div class="tabs" role="tablist">
+            <button class="tab active" role="tab" data-tab-id="files" aria-selected="true" aria-controls="files">📁 File Structure</button>
+            <button class="tab" role="tab" data-tab-id="flow" aria-selected="false" aria-controls="flow">🔄 Message Flow</button>
+            <button class="tab" role="tab" data-tab-id="code" aria-selected="false" aria-controls="code">💻 Code Architecture</button>
+            <button class="tab" role="tab" data-tab-id="process" aria-selected="false" aria-controls="process">⚙️ Process Steps</button>
+        </div>
+        
+        <!-- Tab 1: File Structure -->
+        <div id="files" class="tab-content active" role="tabpanel">
+            <div class="section">
+                <h2 class="section-title">Instance Files (Your Bot)</h2>
+                <div class="file-grid">
+                    <div class="file-box config" data-tooltip="C:\nanobot\instance3\config.json">
+                        <h3>📄 config.json</h3>
+                        <div class="path">C:\nanobot\instance3\config.json</div>
+                        <p>The brain's configuration. Defines:</p>
+                        <ul>
+                            <li><strong>model</strong> - Which LLM to use</li>
+                            <li><strong>api_key</strong> - Authentication</li>
+                            <li><strong>port</strong> - Gateway port</li>
+                            <li><strong>channels</strong> - Telegram, WhatsApp, etc.</li>
+                            <li><strong>providers</strong> - API endpoints</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="file-box soul" data-tooltip="C:\nanobot\instance3\workspace\SOUL.md">
+                        <h3>🧠 SOUL.md</h3>
+                        <div class="path">C:\nanobot\instance3\workspace\SOUL.md</div>
+                        <p>The personality and behavior instructions. Loaded into every LLM call.</p>
+                        <ul>
+                            <li><strong>Who I Am</strong> - Identity</li>
+                            <li><strong>How I Talk</strong> - Communication style</li>
+                            <li><strong>How I Work</strong> - Action directives</li>
+                            <li><strong>Never / Always</strong> - Ironclad rules</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="file-box memory" data-tooltip="C:\nanobot\instance3\workspace\memory\MEMORY.md">
+                        <h3>📚 MEMORY.md</h3>
+                        <div class="path">C:\nanobot\instance3\workspace\memory\MEMORY.md</div>
+                        <p>Long-term facts loaded into every conversation.</p>
+                        <ul>
+                            <li>User preferences</li>
+                            <li>Project context</li>
+                            <li>Important relationships</li>
+                            <li>Technical decisions</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="file-box memory" data-tooltip="C:\nanobot\instance3\workspace\memory\HISTORY.md">
+                        <h3>📜 HISTORY.md</h3>
+                        <div class="path">C:\nanobot\instance3\workspace\memory\HISTORY.md</div>
+                        <p>Append-only log of past events. Not loaded into context - grep searchable.</p>
+                        <ul>
+                            <li>Conversation summaries</li>
+                            <li>Task completions</li>
+                            <li>Important decisions</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="file-box skills" data-tooltip="C:\nanobot\instance3\workspace\skills\{name}\SKILL.md">
+                        <h3>🔧 Skills</h3>
+                        <div class="path">C:\nanobot\instance3\workspace\skills\{name}\SKILL.md</div>
+                        <p>Modular capabilities the agent can learn.</p>
+                        <ul>
+                            <li><strong>memory</strong> - Memory management</li>
+                            <li><strong>cron</strong> - Scheduling</li>
+                            <li><strong>weather</strong> - Weather data</li>
+                            <li><strong>goal-tracker</strong> - Project tracking</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="file-box session" data-tooltip=".nanobot/sessions/{session_key}.json">
+                        <h3>💬 Sessions</h3>
+                        <div class="path">.nanobot/sessions/{session_key}.json</div>
+                        <p>Conversation history per channel/chat.</p>
+                        <ul>
+                            <li>Message history</li>
+                            <li>Tools used</li>
+                            <li>Timestamps</li>
+                            <li>Consolidation state</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 2: Message Flow -->
+        <div id="flow" class="tab-content" role="tabpanel">
+            <div class="section">
+                <h2 class="section-title">How a Message Travels</h2>
+                
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-color" style="background: #3498db;"></div> User</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #9b59b6;"></div> Channel</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #e74c3c;"></div> Bus</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #00C2A8;"></div> Agent</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #f39c12;"></div> Context</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #D96A1B;"></div> LLM</div>
+                    <div class="legend-item"><div class="legend-color" style="background: #27ae60;"></div> Tools</div>
+                </div>
+                
+                <div class="flow-container">
+                    <!-- Row 1: User sends message -->
+                    <div class="flow-row">
+                        <div class="flow-box user" data-tooltip="Sends message in Telegram">
+                            <h4>👤 User</h4>
+                            <div class="detail">Sends message in Telegram</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box channel" data-tooltip="telegram.py">
+                            <h4>📱 TelegramChannel</h4>
+                            <div class="detail">telegram.py</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Row 2: Channel to Bus -->
+                    <div class="flow-row">
+                        <div class="flow-box channel" data-tooltip="_on_message()">
+                            <h4>📱 TelegramChannel</h4>
+                            <div class="detail">_on_message()</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box bus" data-tooltip="bus/queue.py">
+                            <h4>🚌 MessageBus</h4>
+                            <div class="detail">bus/queue.py</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box agent" data-tooltip="agent/loop.py">
+                            <h4>🔄 AgentLoop</h4>
+                            <div class="detail">agent/loop.py</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Row 3: Agent builds context -->
+                    <div class="flow-row">
+                        <div class="flow-box agent" data-tooltip="_process_message()">
+                            <h4>🔄 AgentLoop</h4>
+                            <div class="detail">_process_message()</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box context" data-tooltip="context.py">
+                            <h4>📝 ContextBuilder</h4>
+                            <div class="detail">context.py</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Row 4: Context assembles prompt -->
+                    <div class="flow-row">
+                        <div class="flow-box context" data-tooltip="build_system_prompt()">
+                            <h4>📝 ContextBuilder</h4>
+                            <div class="detail">build_system_prompt()</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box soul" data-tooltip="Personality">
+                            <h4>🧠 SOUL.md</h4>
+                            <div class="detail">Personality</div>
+                        </div>
+                        <span class="arrow">+</span>
+                        <div class="flow-box memory" data-tooltip="Long-term facts">
+                            <h4>📚 MEMORY.md</h4>
+                            <div class="detail">Long-term facts</div>
+                        </div>
+                        <span class="arrow">+</span>
+                        <div class="flow-box skills" data-tooltip="Capabilities">
+                            <h4>🔧 Skills</h4>
+                            <div class="detail">Capabilities</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Row 5: LLM call -->
+                    <div class="flow-row">
+                        <div class="flow-box context" data-tooltip="[system, history, user]">
+                            <h4>📝 Messages</h4>
+                            <div class="detail">[system, history, user]</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box llm" data-tooltip="providers/litellm_provider.py">
+                            <h4>🤖 LiteLLMProvider</h4>
+                            <div class="detail">providers/litellm_provider.py</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box llm" data-tooltip="API Call">
+                            <h4>🌐 OpenRouter</h4>
+                            <div class="detail">API Call</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Row 6: Tool execution -->
+                    <div class="flow-row">
+                        <div class="flow-box llm" data-tooltip="Tool calls or text">
+                            <h4>🤖 LLM Response</h4>
+                            <div class="detail">Tool calls or text</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box tools" data-tooltip="tools/registry.py">
+                            <h4>🛠️ ToolRegistry</h4>
+                            <div class="detail">tools/registry.py</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box tools" data-tooltip="Execute tool">
+                            <h4>📁 read_file</h4>
+                            <div class="detail">Execute tool</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Row 7: Response back -->
+                    <div class="flow-row">
+                        <div class="flow-box agent" data-tooltip="Final response">
+                            <h4>🔄 AgentLoop</h4>
+                            <div class="detail">Final response</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box bus" data-tooltip="publish_outbound()">
+                            <h4>🚌 MessageBus</h4>
+                            <div class="detail">publish_outbound()</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box channel" data-tooltip="send()">
+                            <h4>📱 TelegramChannel</h4>
+                            <div class="detail">send()</div>
+                        </div>
+                        <span class="arrow">→</span>
+                        <div class="flow-box user" data-tooltip="Receives reply">
+                            <h4>👤 User</h4>
+                            <div class="detail">Receives reply</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 3: Code Architecture -->
+        <div id="code" class="tab-content" role="tabpanel">
+            <div class="section">
+                <h2 class="section-title">Code Structure</h2>
+                
+                <div class="code-tree">
+                    <div class="folder">📁 nanobot/</div>
+                    <div class="file important">├── __main__.py <span class="desc"># Entry point</span></div>
+                    <div class="file">├── main.py <span class="desc"># Robot navigation (legacy)</span></div>
+                    <div class="file important">├── cli/</div>
+                    <div class="file">│   └── commands.py <span class="desc"># gateway, agent, cron commands</span></div>
+                    <div class="file important">├── agent/</div>
+                    <div class="file important">│   ├── loop.py <span class="desc"># ⭐ AgentLoop - core processing engine</span></div>
+                    <div class="file important">│   ├── context.py <span class="desc"># ⭐ ContextBuilder - assembles prompts</span></div>
+                    <div class="file important">│   ├── skills.py <span class="desc"># SkillsLoader - loads SKILL.md files</span></div>
+                    <div class="file">│   ├── memory.py <span class="desc"># MemoryStore - MEMORY.md/HISTORY.md</span></div>
+                    <div class="file">│   ├── subagent.py <span class="desc"># SubagentManager - background tasks</span></div>
+                    <div class="file">│   └── tools/</div>
+                    <div class="file">│       ├── registry.py <span class="desc"># ToolRegistry</span></div>
+                    <div class="file">│       ├── filesystem.py <span class="desc"># read_file, write_file, edit_file, list_dir</span></div>
+                    <div class="file">│       ├── shell.py <span class="desc"># exec</span></div>
+                    <div class="file">│       ├── web.py <span class="desc"># web_search, web_fetch</span></div>
+                    <div class="file">│       ├── message.py <span class="desc"># message (send to user)</span></div>
+                    <div class="file">│       ├── spawn.py <span class="desc"># spawn (subagent)</span></div>
+                    <div class="file">│       └── cron.py <span class="desc"># cron (scheduling)</span></div>
+                    <div class="file important">├── providers/</div>
+                    <div class="file important">│   ├── litellm_provider.py <span class="desc"># ⭐ LiteLLMProvider - talks to LLM</span></div>
+                    <div class="file">│   ├── base.py <span class="desc"># LLMProvider, LLMResponse, ToolCallRequest</span></div>
+                    <div class="file">│   ├── registry.py <span class="desc"># Provider specs (OpenRouter, Anthropic, etc.)</span></div>
+                    <div class="file">│   └── transcription.py <span class="desc"># Voice transcription</span></div>
+                    <div class="file important">├── channels/</div>
+                    <div class="file important">│   ├── telegram.py <span class="desc"># ⭐ TelegramChannel</span></div>
+                    <div class="file">│   ├── discord.py <span class="desc"># DiscordChannel</span></div>
+                    <div class="file">│   ├── whatsapp.py <span class="desc"># WhatsAppChannel</span></div>
+                    <div class="file">│   ├── slack.py <span class="desc"># SlackChannel</span></div>
+                    <div class="file">│   ├── manager.py <span class="desc"># ChannelManager</span></div>
+                    <div class="file">│   └── base.py <span class="desc"># BaseChannel</span></div>
+                    <div class="file important">├── bus/</div>
+                    <div class="file">│   ├── queue.py <span class="desc"># MessageBus - inbound/outbound queues</span></div>
+                    <div class="file">│   └── events.py <span class="desc"># InboundMessage, OutboundMessage</span></div>
+                    <div class="file important">├── config/</div>
+                    <div class="file">│   ├── schema.py <span class="desc"># Config, ProvidersConfig, ChannelsConfig</span></div>
+                    <div class="file">│   └── loader.py <span class="desc"># load_config(), get_config_path()</span></div>
+                    <div class="file">├── session/</div>
+                    <div class="file">│   └── manager.py <span class="desc"># SessionManager, Session</span></div>
+                    <div class="file">├── cron/</div>
+                    <div class="file">│   ├── service.py <span class="desc"># CronService</span></div>
+                    <div class="file">│   └── types.py <span class="desc"># CronJob, CronSchedule</span></div>
+                    <div class="file">└── skills/</div>
+                    <div class="file">    ├── memory/SKILL.md</div>
+                    <div class="file">    ├── cron/SKILL.md</div>
+                    <div class="file">    ├── weather/SKILL.md</div>
+                    <div class="file">    └── ...</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">Key Classes</h2>
+                <div class="file-grid">
+                    <div class="file-box" data-tooltip="agent/loop.py">
+                        <h3>AgentLoop</h3>
+                        <div class="path">agent/loop.py</div>
+                        <p>The brain's processing engine. Orchestrates everything:</p>
+                        <ul>
+                            <li>Receives messages from bus</li>
+                            <li>Builds context via ContextBuilder</li>
+                            <li>Calls LLM via LiteLLMProvider</li>
+                            <li>Executes tools via ToolRegistry</li>
+                            <li>Sends responses back to bus</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="file-box" data-tooltip="agent/context.py">
+                        <h3>ContextBuilder</h3>
+                        <div class="path">agent/context.py</div>
+                        <p>Assembles the system prompt:</p>
+                        <ul>
+                            <li>Loads SOUL.md, USER.md, AGENTS.md</li>
+                            <li>Loads MEMORY.md</li>
+                            <li>Loads always-skills</li>
+                            <li>Builds skills summary</li>
+                            <li>Adds session history</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="file-box" data-tooltip="providers/litellm_provider.py">
+                        <h3>LiteLLMProvider</h3>
+                        <div class="path">providers/litellm_provider.py</div>
+                        <p>Talks to the LLM:</p>
+                        <ul>
+                            <li>Resolves model name</li>
+                            <li>Applies provider prefixes</li>
+                            <li>Handles auto-routing to free models</li>
+                            <li>Parses tool calls</li>
+                            <li>Returns LLMResponse</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="file-box" data-tooltip="channels/telegram.py">
+                        <h3>TelegramChannel</h3>
+                        <div class="path">channels/telegram.py</div>
+                        <p>Telegram interface:</p>
+                        <ul>
+                            <li>Polls for messages</li>
+                            <li>Downloads media</li>
+                            <li>Transcribes voice</li>
+                            <li>Sends typing indicator</li>
+                            <li>Converts markdown to HTML</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 4: Process Steps -->
+        <div id="process" class="tab-content" role="tabpanel">
+            <div class="section">
+                <h2 class="section-title">Step-by-Step: What Happens When You Send a Message</h2>
+                
+                <div class="process-steps">
+                    <div class="step">
+                        <h4>Startup: <code>nanobot gateway --port 18792</code></h4>
+                        <p>
+                            The CLI command in <code>cli/commands.py</code> creates:
+                            <br>• <code>MessageBus</code> - message queues
+                            <br>• <code>LiteLLMProvider</code> - LLM connection
+                            <br>• <code>AgentLoop</code> - processing engine
+                            <br>• <code>ChannelManager</code> - starts Telegram, etc.
+                            <br>• <code>CronService</code> - scheduled tasks
+                        </p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Message Arrives: <code>TelegramChannel._on_message()</code></h4>
+                        <p>
+                            When you send a message in Telegram:
+                            <br>• <code>telegram.py</code> receives it via polling
+                            <br>• Downloads any media (photos, voice)
+                            <br>• Transcribes voice messages
+                            <br>• Creates <code>InboundMessage</code>
+                            <br>• Publishes to <code>MessageBus</code>
+                        </p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Agent Picks Up: <code>AgentLoop.run()</code></h4>
+                        <p>
+                            The agent loop is waiting on the bus:
+                            <br>• <code>msg = await self.bus.consume_inbound()</code>
+                            <br>• Calls <code>_process_message(msg)</code>
+                        </p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Build Context: <code>ContextBuilder.build_messages()</code></h4>
+                        <p>
+                            Assembles the prompt for the LLM:
+                            <br>• <code>build_system_prompt()</code> loads SOUL.md, MEMORY.md, skills
+                            <br>• Adds session history from <code>SessionManager</code>
+                            <br>• Adds current user message
+                            <br>• Returns <code>[system_msg, history..., user_msg]</code>
+                        </p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Call LLM: <code>LiteLLMProvider.chat()</code></h4>
+                        <p>
+                            Sends to OpenRouter/Anthropic/etc:
+                            <br>• Resolves model name (adds provider prefix)
+                            <br>• Checks auto-router for free model routing
+                            <br>• Calls <code>litellm.acompletion()</code>
+                            <br>• Parses response into <code>LLMResponse</code>
+                        </p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Tool Execution: <code>ToolRegistry.execute()</code></h4>
+                        <p>
+                            If LLM returns tool calls:
+                            <br>• Agent loops through <code>response.tool_calls</code>
+                            <br>• Each tool executes (read_file, exec, etc.)
+                            <br>• Results added back to messages
+                            <br>• Calls LLM again with tool results
+                            <br>• Repeats until no more tool calls
+                        </p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Send Response: <code>MessageBus.publish_outbound()</code></h4>
+                        <p>
+                            Final response goes back:
+                            <br>• Agent creates <code>OutboundMessage</code>
+                            <br>• Publishes to bus
+                            <br>• <code>TelegramChannel.send()</code> picks it up
+                            <br>• Converts markdown to HTML
+                            <br>• Sends via Telegram API
+                        </p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Memory Consolidation: <code>_consolidate_memory()</code></h4>
+                        <p>
+                            When session gets long:
+                            <br>• Summarizes old messages via LLM
+                            <br>• Appends summary to HISTORY.md
+                            <br>• Extracts facts to MEMORY.md
+                            <br>• Clears old messages from session
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">What Talks to the LLM</h2>
+                <div class="file-grid">
+                    <div class="file-box llm" data-tooltip="Direct LLM Calls">
+                        <h3>Direct LLM Calls</h3>
+                        <p>These components call the LLM directly:</p>
+                        <ul>
+                            <li><strong>AgentLoop</strong> - Main chat responses</li>
+                            <li><strong>_consolidate_memory()</strong> - Memory summarization</li>
+                            <li><strong>SubagentManager</strong> - Background tasks</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="file-box" data-tooltip="System prompt contents">
+                        <h3>What's in Every LLM Call</h3>
+                        <p>The system prompt always includes:</p>
+                        <ul>
+                            <li><strong>Identity</strong> - "You are nanobot..."</li>
+                            <li><strong>SOUL.md</strong> - Personality</li>
+                            <li><strong>MEMORY.md</strong> - Long-term facts</li>
+                            <li><strong>Always Skills</strong> - Pre-loaded capabilities</li>
+                            <li><strong>Skills Summary</strong> - Available skills list</li>
+                            <li><strong>Session History</strong> - Recent messages</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="file-box" data-tooltip="Available tools">
+                        <h3>Tool Definitions</h3>
+                        <p>Tools are sent with each LLM call:</p>
+                        <ul>
+                            <li><strong>read_file</strong> - Read file contents</li>
+                            <li><strong>write_file</strong> - Write to file</li>
+                            <li><strong>edit_file</strong> - Edit file</li>
+                            <li><strong>list_dir</strong> - List directory</li>
+                            <li><strong>exec</strong> - Run shell command</li>
+                            <li><strong>web_search</strong> - Search the web</li>
+                            <li><strong>web_fetch</strong> - Fetch URL</li>
+                            <li><strong>message</strong> - Send message</li>
+                            <li><strong>spawn</strong> - Create subagent</li>
+                            <li><strong>cron</strong> - Schedule task</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Theme JavaScript -->
+    <script src="brain_map_theme.js"></script>
+    <script src="brain_map_interactive.js"></script>
+</body>
+</html>

@@ -1,0 +1,843 @@
+/* ============================================
+   Nanobot Brain Map - Theme Styles
+   ============================================ */
+
+/* CSS Variables for Theme Colors */
+:root {
+    /* Dark Mode (Default) */
+    --bg-primary: #0E1A2B;
+    --bg-secondary: #162437;
+    --bg-tertiary: #0a0f1a;
+    --text-primary: #e0e6ed;
+    --text-secondary: #aaa;
+    --text-muted: #888;
+    --accent-primary: #00C2A8;
+    --accent-secondary: #D96A1B;
+    --border-color: #2a3f5f;
+    
+    /* Flow box colors - dark mode */
+    --user-bg: #1a3a5c;
+    --user-border: #3498db;
+    --channel-bg: #2d1f3d;
+    --channel-border: #9b59b6;
+    --bus-bg: #3d1f1f;
+    --bus-border: #e74c3c;
+    --agent-bg: #1a3d3d;
+    --agent-border: #00C2A8;
+    --context-bg: #3d3a1a;
+    --context-border: #f39c12;
+    --llm-bg: #3d2a1a;
+    --llm-border: #D96A1B;
+    --tools-bg: #1a3d2a;
+    --tools-border: #27ae60;
+    --memory-bg: #2d1f3d;
+    --memory-border: #9b59b6;
+    --skills-bg: #1a3a5c;
+    --skills-border: #3498db;
+    --soul-bg: #1a3d3d;
+    --soul-border: #00C2A8;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    
+    /* Interactive */
+    --accent-color: #00C2A8;
+    --accent-glow: rgba(0, 194, 168, 0.4);
+    --bg-hover: #1e3a5f;
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* Light Mode */
+[data-theme="light"] {
+    --bg-primary: #F6F1E8;
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: #EDE8DD;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a5a;
+    --text-muted: #6a6a7a;
+    --accent-primary: #D96A1B;
+    --accent-secondary: #00C2A8;
+    --border-color: #d4cfc4;
+    
+    /* Flow box colors - light mode */
+    --user-bg: #e3f0fc;
+    --user-border: #3498db;
+    --channel-bg: #f3e8f8;
+    --channel-border: #9b59b6;
+    --bus-bg: #fce8e8;
+    --bus-border: #e74c3c;
+    --agent-bg: #e6f5f3;
+    --agent-border: #00C2A8;
+    --context-bg: #fcf5e6;
+    --context-border: #f39c12;
+    --llm-bg: #fcf0e6;
+    --llm-border: #D96A1B;
+    --tools-bg: #e6f5ec;
+    --tools-border: #27ae60;
+    --memory-bg: #f3e8f8;
+    --memory-border: #9b59b6;
+    --skills-bg: #e3f0fc;
+    --skills-border: #3498db;
+    --soul-bg: #e6f5f3;
+    --soul-border: #00C2A8;
+    
+    /* Shadows - lighter for light mode */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+    
+    /* Interactive */
+    --accent-color: #D96A1B;
+    --accent-glow: rgba(217, 106, 27, 0.3);
+    --bg-hover: #EDE8DD;
+}
+
+/* ============================================
+   Base Styles with Theme Support
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Oxygen', sans-serif;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    padding: 20px;
+    min-height: 100vh;
+    line-height: 1.6;
+    transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+/* ============================================
+   Theme Toggle Button
+   ============================================ */
+
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-primary);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: var(--shadow-lg);
+}
+
+.theme-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-primary);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon {
+    transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+.theme-toggle .icon-sun {
+    display: none;
+}
+
+.theme-toggle .icon-moon {
+    display: block;
+}
+
+[data-theme="light"] .theme-toggle .icon-sun {
+    display: block;
+}
+
+[data-theme="light"] .theme-toggle .icon-moon {
+    display: none;
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.3;
+    transition: color var(--transition-normal);
+}
+
+h1 {
+    text-align: center;
+    color: var(--accent-primary);
+    margin-bottom: 10px;
+    font-size: 2.2em;
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+/* ============================================
+   Container & Layout
+   ============================================ */
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-bottom: 80px; /* Space for footer */
+}
+
+.section {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    color: var(--accent-secondary);
+    font-size: 1.4em;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent-secondary);
+    transition: color var(--transition-normal), border-color var(--transition-normal);
+}
+
+/* ============================================
+   File Grid
+   ============================================ */
+
+.file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.file-box {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    border-left: 4px solid var(--accent-primary);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+}
+
+.file-box:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.file-box.config { border-left-color: var(--accent-secondary); }
+.file-box.soul { border-left-color: var(--accent-primary); }
+.file-box.memory { border-left-color: #9b59b6; }
+.file-box.skills { border-left-color: #3498db; }
+.file-box.session { border-left-color: #e74c3c; }
+.file-box.llm { border-left-color: var(--accent-secondary); }
+
+.file-box h3 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.file-box .path {
+    font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+    color: var(--text-muted);
+    font-size: 0.85em;
+    margin-bottom: 10px;
+    word-break: break-all;
+}
+
+.file-box p {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+.file-box ul {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+.file-box li {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    margin-bottom: 5px;
+}
+
+.file-box li strong {
+    color: var(--accent-primary);
+}
+
+/* ============================================
+   Flow Diagram
+   ============================================ */
+
+.flow-container {
+    background: var(--bg-primary);
+    border-radius: 15px;
+    padding: 30px;
+    overflow-x: auto;
+    box-shadow: var(--shadow-sm);
+    transition: background var(--transition-normal);
+}
+
+.flow-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.flow-box {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 15px 25px;
+    text-align: center;
+    min-width: 150px;
+    border: 2px solid var(--accent-primary);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+}
+
+.flow-box:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.flow-box.user { border-color: var(--user-border); background: var(--user-bg); }
+.flow-box.channel { border-color: var(--channel-border); background: var(--channel-bg); }
+.flow-box.bus { border-color: var(--bus-border); background: var(--bus-bg); }
+.flow-box.agent { border-color: var(--agent-border); background: var(--agent-bg); }
+.flow-box.context { border-color: var(--context-border); background: var(--context-bg); }
+.flow-box.llm { border-color: var(--llm-border); background: var(--llm-bg); }
+.flow-box.tools { border-color: var(--tools-border); background: var(--tools-bg); }
+.flow-box.memory { border-color: var(--memory-border); background: var(--memory-bg); }
+.flow-box.skills { border-color: var(--skills-border); background: var(--skills-bg); }
+.flow-box.soul { border-color: var(--soul-border); background: var(--soul-bg); }
+
+.flow-box h4 {
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    font-size: 0.95em;
+}
+
+.flow-box .detail {
+    font-size: 0.75em;
+    color: var(--text-muted);
+}
+
+.arrow {
+    color: var(--accent-primary);
+    font-size: 1.8em;
+    padding: 0 10px;
+    transition: color var(--transition-normal);
+    user-select: none;
+}
+
+/* ============================================
+   Code Tree
+   ============================================ */
+
+.code-tree {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 25px;
+    font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+    font-size: 0.9em;
+    overflow-x: auto;
+    box-shadow: var(--shadow-sm);
+    transition: background var(--transition-normal);
+}
+
+.code-tree .folder {
+    color: var(--accent-primary);
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.code-tree .file {
+    color: var(--text-secondary);
+    margin-left: 20px;
+    margin-bottom: 3px;
+    white-space: nowrap;
+}
+
+.code-tree .important {
+    color: var(--accent-secondary);
+    font-weight: 500;
+}
+
+.code-tree .desc {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ============================================
+   Process Steps
+   ============================================ */
+
+.process-steps {
+    counter-reset: step;
+}
+
+.step {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    padding-left: 70px;
+    margin-bottom: 15px;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+}
+
+.step:hover {
+    transform: translateX(5px);
+    box-shadow: var(--shadow-md);
+}
+
+.step::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--accent-secondary);
+    color: #fff;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1em;
+    box-shadow: var(--shadow-sm);
+    transition: background var(--transition-normal);
+}
+
+.step h4 {
+    color: var(--accent-primary);
+    margin-bottom: 10px;
+    font-size: 1.05em;
+}
+
+.step p {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+.step code {
+    background: var(--bg-primary);
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: var(--accent-secondary);
+    font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+    font-size: 0.85em;
+    transition: background var(--transition-normal);
+}
+
+/* ============================================
+   Legend
+   ============================================ */
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   Tabs
+   ============================================ */
+
+.tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    padding-bottom: 5px;
+}
+
+.tab {
+    background: var(--bg-secondary);
+    border: none;
+    color: var(--text-muted);
+    padding: 12px 24px;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    font-size: 1em;
+    font-family: inherit;
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.tab:hover {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+}
+
+.tab:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent-primary);
+}
+
+.tab.active {
+    background: var(--accent-primary);
+    color: #fff;
+    font-weight: 500;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 15px 20px;
+    text-align: center;
+    z-index: 100;
+    transition: background var(--transition-normal), border-color var(--transition-normal);
+}
+
+.footer-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+.footer-content .heart {
+    color: #e74c3c;
+    animation: heartbeat 1.5s ease infinite;
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.footer-content a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.footer-content a:hover {
+    color: var(--accent-secondary);
+    text-decoration: underline;
+}
+
+/* ============================================
+   Tooltips
+   ============================================ */
+
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-fast);
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    pointer-events: none;
+}
+
+[data-tooltip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-10px);
+}
+
+/* Tooltip positions */
+[data-tooltip="bottom"]::after {
+    bottom: auto;
+    top: 100%;
+    transform: translateX(-50%) translateY(5px);
+}
+
+[data-tooltip="bottom"]:hover::after {
+    transform: translateX(-50%) translateY(10px);
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+        padding-bottom: 100px;
+    }
+    
+    h1 {
+        font-size: 1.6em;
+        padding-right: 50px;
+    }
+    
+    .subtitle {
+        font-size: 0.95em;
+        margin-bottom: 20px;
+    }
+    
+    .theme-toggle {
+        top: 15px;
+        right: 15px;
+        width: 44px;
+        height: 44px;
+        font-size: 1.3em;
+    }
+    
+    .tabs {
+        gap: 5px;
+    }
+    
+    .tab {
+        padding: 10px 16px;
+        font-size: 0.9em;
+        border-radius: 8px;
+    }
+    
+    .file-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .file-box {
+        padding: 15px;
+    }
+    
+    .flow-container {
+        padding: 15px;
+    }
+    
+    .flow-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .flow-box {
+        min-width: 100%;
+        padding: 12px 15px;
+    }
+    
+    .arrow {
+        transform: rotate(90deg);
+        font-size: 1.5em;
+        padding: 5px 0;
+    }
+    
+    .code-tree {
+        padding: 15px;
+        font-size: 0.8em;
+    }
+    
+    .step {
+        padding: 15px;
+        padding-left: 60px;
+    }
+    
+    .step::before {
+        left: 15px;
+        width: 30px;
+        height: 30px;
+        font-size: 1em;
+    }
+    
+    .legend {
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .legend-item {
+        font-size: 0.8em;
+    }
+    
+    .footer {
+        padding: 12px 15px;
+    }
+    
+    .footer-content {
+        font-size: 0.85em;
+    }
+    
+    /* Hide tooltips on mobile - they can be annoying */
+    [data-tooltip]::after {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+        padding-bottom: 90px;
+    }
+    
+    h1 {
+        font-size: 1.4em;
+    }
+    
+    .section-title {
+        font-size: 1.2em;
+    }
+    
+    .tab {
+        padding: 8px 12px;
+        font-size: 0.85em;
+    }
+    
+    .file-box h3 {
+        font-size: 1em;
+    }
+    
+    .file-box .path {
+        font-size: 0.75em;
+    }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+    .theme-toggle,
+    .footer {
+        display: none !important;
+    }
+    
+    body {
+        background: white;
+        color: black;
+        padding: 0;
+    }
+    
+    .file-box,
+    .flow-container,
+    .code-tree,
+    .step {
+        break-inside: avoid;
+    }
+}
+
+/* ============================================
+   Accessibility
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus styles for keyboard navigation */
+*:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: var(--text-primary);
+    }
+    
+    .file-box,
+    .flow-box,
+    .step {
+        border: 2px solid var(--text-primary);
+    }
+}

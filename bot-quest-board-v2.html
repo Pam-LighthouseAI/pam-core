@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Quest Board</title>
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Uncial+Antiqua&family=Almendra:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+DW+Pica+SC&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wood-dark: #3b2314; --wood-mid: #5c3a1e; --wood-light: #7a4f2b;
+    --parchment: #e8d5a3; --parchment-dark: #c4a86a; --parchment-edge: #b8975a;
+    --ink: #2a1a0a; --ink-mid: #4a3520; --ink-faded: #7a6545; --ink-light: #9a8565;
+    --wax-red: #8b1a1a; --wax-gold: #b8860b; --wax-green: #2d5a1e; --wax-blue: #1a3a5c;
+    --gold-text: #c9a84c; --blood-red: #6b1010;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { min-height: 100vh; background: var(--wood-dark); font-family: 'IM Fell English', serif; color: var(--ink); overflow-x: hidden; }
+
+  .wood-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      repeating-linear-gradient(90deg, transparent 0px, rgba(0,0,0,0.03) 2px, transparent 4px, rgba(0,0,0,0.02) 8px, transparent 12px),
+      repeating-linear-gradient(180deg, transparent 0px, rgba(0,0,0,0.015) 40px, transparent 80px),
+      linear-gradient(180deg, #4a2e18 0%, #3b2314 15%, #5c3a1e 30%, #3b2314 50%, #4a2e18 65%, #3b2314 80%, #5c3a1e 100%);
+  }
+  .wood-bg::after {
+    content: ''; position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 30% 20%, rgba(120,80,30,0.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 70%, rgba(0,0,0,0.2) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .nail { position: fixed; width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #8a8a7a, #4a4a3a 60%, #2a2a1a); box-shadow: 1px 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15); z-index: 100; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes candleFlicker { 0%,100% { opacity: 0.9; text-shadow: 0 0 8px rgba(200,150,50,0.6); } 25% { opacity: 1; text-shadow: 0 0 12px rgba(200,150,50,0.8); } 50% { opacity: 0.85; text-shadow: 0 0 6px rgba(200,150,50,0.5); } 75% { opacity: 0.95; text-shadow: 0 0 10px rgba(200,150,50,0.7); } }
+  @keyframes waxDrip { from { opacity: 0; transform: scale(0.7) rotate(-10deg); } to { opacity: 1; transform: scale(1) rotate(0deg); } }
+  @keyframes parchmentUnroll { from { opacity: 0; transform: scaleY(0.85); transform-origin: top; } to { opacity: 1; transform: scaleY(1); } }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 1; }
+
+  .header { text-align: center; margin-bottom: 30px; animation: fadeUp 0.6s ease; }
+  .header-crest { font-size: 52px; margin-bottom: 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
+  .header-title { font-family: 'Uncial Antiqua', serif; font-size: 38px; color: var(--gold-text); animation: candleFlicker 3s ease-in-out infinite; letter-spacing: 3px; }
+  .header-sub { font-family: 'IM Fell English', serif; font-size: 16px; color: var(--parchment-dark); font-style: italic; margin-top: 2px; letter-spacing: 1px; }
+  .header-rule { width: 200px; height: 1px; margin: 10px auto 0; background: linear-gradient(90deg, transparent, var(--parchment-dark), transparent); }
+
+  .stats-banner { display: flex; gap: 0; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; animation: fadeUp 0.5s ease 0.1s both; }
+  .stat-seal { display: flex; flex-direction: column; align-items: center; padding: 10px 22px; position: relative; }
+  .stat-seal + .stat-seal::before { content: '\2B25'; position: absolute; left: -4px; top: 50%; transform: translateY(-50%); color: var(--parchment-dark); font-size: 8px; opacity: 0.5; }
+  .stat-icon { font-size: 24px; margin-bottom: 2px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); }
+  .stat-val { font-family: 'MedievalSharp', cursive; font-size: 28px; color: var(--gold-text); line-height: 1; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+  .stat-label { font-family: 'IM Fell English', serif; font-size: 13px; color: var(--parchment-dark); letter-spacing: 1px; text-transform: uppercase; }
+
+  .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  @media (max-width: 800px) { .board { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .board { grid-template-columns: 1fr; } }
+
+  .column { background: rgba(255,255,255,0.01); border: 2px solid rgba(100,70,30,0.4); border-radius: 4px; padding: 14px 12px; min-height: 300px; position: relative; animation: fadeUp 0.5s ease both; box-shadow: inset 0 2px 8px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.3); }
+  .column::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 20px; height: 10px; background: radial-gradient(circle at 50% 30%, #7a7a6a, #3a3a2a); border-radius: 3px; box-shadow: 0 2px 3px rgba(0,0,0,0.4); }
+  .column:nth-child(1) { animation-delay: 0.1s; } .column:nth-child(2) { animation-delay: 0.15s; } .column:nth-child(3) { animation-delay: 0.2s; } .column:nth-child(4) { animation-delay: 0.25s; }
+
+  .col-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(200,170,100,0.15); }
+  .col-title { font-family: 'Uncial Antiqua', serif; font-size: 16px; letter-spacing: 1px; }
+  .col-count { font-family: 'MedievalSharp', cursive; font-size: 15px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+  .col-available .col-title { color: var(--parchment); } .col-available .col-count { color: var(--parchment); background: rgba(232,213,163,0.1); }
+  .col-active .col-title { color: var(--gold-text); } .col-active .col-count { color: var(--gold-text); background: rgba(201,168,76,0.15); }
+  .col-complete .col-title { color: #7aaa5a; } .col-complete .col-count { color: #7aaa5a; background: rgba(122,170,90,0.1); }
+  .col-failed .col-title { color: #aa5a5a; } .col-failed .col-count { color: #aa5a5a; background: rgba(170,90,90,0.1); }
+  .col-empty { font-family: 'IM Fell English', serif; font-size: 14px; color: var(--parchment-dark); text-align: center; padding: 30px 8px; font-style: italic; opacity: 0.6; }
+
+  .quest-scroll { position: relative; background: linear-gradient(170deg, #e8d5a3 0%, #dcc88e 30%, #d4bc7a 60%, #cbb070 100%); border: 1px solid var(--parchment-edge); border-radius: 3px; padding: 14px 12px 12px; margin-bottom: 10px; cursor: default; transition: all 0.25s ease; box-shadow: 2px 3px 8px rgba(0,0,0,0.3), inset 0 0 20px rgba(160,130,70,0.15); animation: parchmentUnroll 0.4s ease both; overflow: hidden; }
+  .quest-scroll::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0px, rgba(120,90,40,0.02) 1px, transparent 2px); pointer-events: none; border-radius: 3px; }
+  .quest-scroll::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 8px; background: linear-gradient(180deg, transparent, rgba(180,150,90,0.2)); pointer-events: none; }
+  .quest-scroll:hover { transform: translateY(-2px) rotate(0.3deg); box-shadow: 3px 5px 12px rgba(0,0,0,0.4), inset 0 0 20px rgba(160,130,70,0.2); }
+
+  .wax-seal { position: absolute; top: -4px; right: 8px; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: 1px 2px 4px rgba(0,0,0,0.4), inset 0 -1px 2px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.15); animation: waxDrip 0.4s ease both; z-index: 2; }
+  .seal-critical { background: radial-gradient(circle at 40% 35%, #c43030, var(--wax-red)); }
+  .seal-high { background: radial-gradient(circle at 40% 35%, #d4850b, #a06008); }
+  .seal-medium { background: radial-gradient(circle at 40% 35%, #c9a84c, #8a7030); }
+  .seal-low { background: radial-gradient(circle at 40% 35%, #3a6aaa, var(--wax-blue)); }
+  .seal-trivial { background: radial-gradient(circle at 40% 35%, #8a8a7a, #5a5a4a); }
+
+  .quest-icon { font-size: 22px; margin-right: 8px; float: left; margin-top: 1px; }
+  .quest-name { font-family: 'Almendra', serif; font-size: 18px; font-weight: 700; color: var(--ink); line-height: 1.3; margin-bottom: 5px; }
+  .col-complete .quest-name { text-decoration: line-through; text-decoration-color: rgba(42,26,10,0.3); opacity: 0.7; }
+  .col-failed .quest-name { text-decoration: line-through; text-decoration-color: var(--blood-red); color: var(--blood-red); opacity: 0.7; }
+  .quest-obj { font-family: 'IM Fell English', serif; font-size: 14px; color: var(--ink-mid); line-height: 1.55; margin-bottom: 8px; font-style: italic; clear: both; }
+
+  .quest-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+  .qtag { font-family: 'IM Fell English', serif; font-size: 12px; padding: 2px 8px; border-radius: 2px; border: 1px solid; }
+  .qtag-diff { color: var(--ink-mid); border-color: rgba(42,26,10,0.2); background: rgba(42,26,10,0.05); }
+  .qtag-xp { color: var(--wax-gold); border-color: rgba(184,134,11,0.3); background: rgba(184,134,11,0.08); }
+  .qtag-cat { color: var(--ink-faded); border-color: rgba(42,26,10,0.15); background: rgba(42,26,10,0.03); }
+  .qtag-time { color: var(--ink-faded); border-color: rgba(42,26,10,0.1); background: transparent; }
+
+  .quest-criteria { font-family: 'IM Fell English', serif; font-size: 13px; color: var(--ink-faded); margin-bottom: 8px; padding-left: 10px; border-left: 2px solid var(--parchment-edge); line-height: 1.5; }
+  .quest-date { font-family: 'IM Fell English', serif; font-size: 12px; color: var(--ink-light); font-style: italic; }
+
+  .quest-actions { display: flex; gap: 5px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(42,26,10,0.1); }
+  .qbtn { font-family: 'Almendra', serif; font-size: 13px; padding: 4px 12px; border-radius: 2px; cursor: pointer; transition: all 0.2s; border: 1px solid; background: transparent; }
+  .qbtn:hover { transform: translateY(-1px); }
+  .qbtn-start { color: var(--wax-gold); border-color: rgba(184,134,11,0.4); } .qbtn-start:hover { background: rgba(184,134,11,0.1); }
+  .qbtn-complete { color: var(--wax-green); border-color: rgba(45,90,30,0.4); } .qbtn-complete:hover { background: rgba(45,90,30,0.1); }
+  .qbtn-fail { color: var(--wax-red); border-color: rgba(139,26,26,0.3); } .qbtn-fail:hover { background: rgba(139,26,26,0.08); }
+  .qbtn-back { color: var(--ink-faded); border-color: rgba(42,26,10,0.2); } .qbtn-back:hover { background: rgba(42,26,10,0.05); }
+  .qbtn-delete { color: var(--ink-light); border-color: rgba(42,26,10,0.1); }
+  .quest-active-marker { position: absolute; top: 8px; right: 38px; font-size: 12px; color: var(--wax-gold); animation: candleFlicker 2s ease-in-out infinite; }
+
+  .create-section { position: relative; background: linear-gradient(170deg, #e8d5a3 0%, #dcc88e 40%, #d4bc7a 100%); border: 1px solid var(--parchment-edge); border-radius: 4px; padding: 24px 20px; margin-bottom: 24px; box-shadow: 3px 4px 12px rgba(0,0,0,0.3), inset 0 0 30px rgba(160,130,70,0.1); animation: fadeUp 0.5s ease 0.3s both; }
+  .create-section::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0px, rgba(120,90,40,0.015) 1px, transparent 2px); pointer-events: none; border-radius: 4px; }
+  .create-title { font-family: 'Uncial Antiqua', serif; font-size: 22px; color: var(--ink); margin-bottom: 16px; text-align: center; }
+  .create-title::after { content: ''; display: block; width: 120px; height: 1px; margin: 6px auto 0; background: linear-gradient(90deg, transparent, var(--ink-faded), transparent); }
+  .form-row { display: grid; gap: 10px; margin-bottom: 10px; }
+  .form-row-2 { grid-template-columns: 1fr 1fr; }
+  .form-row-4 { grid-template-columns: 2fr 1fr 1fr 1fr; }
+  @media (max-width: 600px) { .form-row-4 { grid-template-columns: 1fr 1fr; } }
+  .field-label { font-family: 'IM Fell DW Pica SC', serif; font-size: 13px; color: var(--ink-mid); letter-spacing: 1px; display: block; margin-bottom: 3px; }
+  .create-section input, .create-section select, .create-section textarea { background: rgba(255,255,255,0.35); border: 1px solid var(--parchment-edge); color: var(--ink); padding: 8px 12px; border-radius: 3px; font-family: 'IM Fell English', serif; font-size: 15px; }
+  .create-section input:focus, .create-section select:focus, .create-section textarea:focus { border-color: var(--ink-faded); background: rgba(255,255,255,0.5); }
+  .create-section select { cursor: pointer; } .create-section select option { background: var(--parchment); color: var(--ink); }
+  .create-section textarea { resize: vertical; min-height: 70px; }
+  .btn-create { width: 100%; margin-top: 8px; font-family: 'Uncial Antiqua', serif; font-size: 17px; color: var(--parchment); background: linear-gradient(180deg, var(--wood-mid), var(--wood-dark)); border: 2px solid var(--wood-light); padding: 12px; border-radius: 4px; cursor: pointer; letter-spacing: 2px; transition: all 0.3s; box-shadow: 0 2px 6px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.08); }
+  .btn-create:hover { background: linear-gradient(180deg, var(--wood-light), var(--wood-mid)); transform: translateY(-1px); }
+
+  .export-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; animation: fadeUp 0.5s ease 0.35s both; }
+  .btn-exp { font-family: 'Almendra', serif; font-size: 14px; padding: 10px 22px; border-radius: 3px; cursor: pointer; letter-spacing: 1px; transition: all 0.3s; border: 1px solid; box-shadow: 1px 2px 4px rgba(0,0,0,0.2); }
+  .btn-exp:hover { transform: translateY(-1px); filter: brightness(1.1); }
+  .btn-exp-scroll { color: var(--parchment); background: linear-gradient(180deg, #6a4420, #4a2e14); border-color: #7a5430; }
+  .btn-exp-ledger { color: var(--parchment); background: linear-gradient(180deg, #2d5a1e, #1a3a10); border-color: #3a7028; }
+  .btn-exp-import { color: var(--parchment); background: linear-gradient(180deg, #1a3a5c, #0f2540); border-color: #2a5080; }
+  .btn-exp-reset { color: var(--parchment); background: linear-gradient(180deg, #6b1010, #4a0a0a); border-color: #8b1a1a; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 300; animation: fadeUp 0.2s ease; }
+  .modal-box { background: linear-gradient(170deg, #e8d5a3 0%, #d4bc7a 100%); border: 2px solid var(--parchment-edge); border-radius: 6px; padding: 28px 32px; text-align: center; box-shadow: 4px 8px 24px rgba(0,0,0,0.5); max-width: 380px; }
+  .modal-icon { font-size: 40px; margin-bottom: 8px; }
+  .modal-title { font-family: 'Uncial Antiqua', serif; font-size: 22px; color: var(--ink); margin-bottom: 10px; }
+  .modal-desc { font-family: 'IM Fell English', serif; font-size: 15px; color: var(--ink-mid); font-style: italic; margin-bottom: 20px; line-height: 1.5; }
+  .modal-btns { display: flex; gap: 12px; justify-content: center; }
+  .modal-btn { font-family: 'Almendra', serif; font-size: 15px; padding: 8px 24px; border-radius: 4px; cursor: pointer; border: 2px solid; transition: all 0.2s; }
+  .modal-btn:hover { transform: translateY(-1px); }
+  .modal-btn-confirm { color: var(--parchment); background: linear-gradient(180deg, #6b1010, #4a0a0a); border-color: #8b1a1a; }
+  .modal-btn-cancel { color: var(--ink); background: rgba(255,255,255,0.3); border-color: var(--parchment-edge); }
+
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: linear-gradient(170deg, var(--parchment), var(--parchment-dark)); border: 2px solid var(--parchment-edge); border-radius: 4px; padding: 12px 24px; font-family: 'IM Fell English', serif; font-size: 15px; color: var(--ink); z-index: 200; opacity: 0; transition: all 0.4s ease; pointer-events: none; box-shadow: 2px 4px 12px rgba(0,0,0,0.4); }
+  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="wood-bg"></div>
+<div class="nail" style="top:20px;left:25px"></div>
+<div class="nail" style="top:20px;right:25px"></div>
+<div class="nail" style="bottom:20px;left:25px"></div>
+<div class="nail" style="bottom:20px;right:25px"></div>
+<div class="nail" style="top:50%;left:15px"></div>
+<div class="nail" style="top:50%;right:15px"></div>
+<div class="toast" id="toast"></div>
+<div id="modalContainer"></div>
+
+<div class="container">
+  <div class="header">
+    <div class="header-crest">&#9876;&#65039;</div>
+    <div class="header-title">Ye Olde Quest Board</div>
+    <div class="header-sub">Missions &amp; Contracts for the Bold</div>
+    <div class="header-rule"></div>
+  </div>
+
+  <div class="stats-banner">
+    <div class="stat-seal"><span class="stat-icon">&#128220;</span><span class="stat-val" id="statAvailable">0</span><span class="stat-label">Awaiting</span></div>
+    <div class="stat-seal"><span class="stat-icon">&#128293;</span><span class="stat-val" id="statActive">0</span><span class="stat-label">Underway</span></div>
+    <div class="stat-seal"><span class="stat-icon">&#127941;</span><span class="stat-val" id="statComplete">0</span><span class="stat-label">Fulfilled</span></div>
+    <div class="stat-seal"><span class="stat-icon">&#128128;</span><span class="stat-val" id="statFailed">0</span><span class="stat-label">Forsaken</span></div>
+    <div class="stat-seal"><span class="stat-icon">&#10024;</span><span class="stat-val" id="statXp">0</span><span class="stat-label">Glory</span></div>
+  </div>
+
+  <div class="board">
+    <div class="column col-available"><div class="col-header"><span class="col-title">&#128220; Awaiting</span><span class="col-count" id="countAvailable">0</span></div><div id="listAvailable"></div></div>
+    <div class="column col-active"><div class="col-header"><span class="col-title">&#128293; Underway</span><span class="col-count" id="countActive">0</span></div><div id="listActive"></div></div>
+    <div class="column col-complete"><div class="col-header"><span class="col-title">&#127941; Fulfilled</span><span class="col-count" id="countComplete">0</span></div><div id="listComplete"></div></div>
+    <div class="column col-failed"><div class="col-header"><span class="col-title">&#128128; Forsaken</span><span class="col-count" id="countFailed">0</span></div><div id="listFailed"></div></div>
+  </div>
+
+  <div class="create-section">
+    <div class="create-title">Post a New Quest</div>
+    <div class="form-row form-row-2">
+      <div><label class="field-label">Quest Name</label><input id="mName" placeholder="The Dragon's Ledger"></div>
+      <div><label class="field-label">Sigil</label><input id="mIcon" placeholder="&#128009;" maxlength="4"></div>
+    </div>
+    <div style="margin-bottom:10px"><label class="field-label">Objective</label><textarea id="mObj" placeholder="Describe the quest in detail..."></textarea></div>
+    <div class="form-row form-row-4">
+      <div><label class="field-label">Domain</label><select id="mCat"><option value="Trading">Commerce</option><option value="Recon">Reconnaissance</option><option value="Defense">Fortification</option><option value="Social">Diplomacy</option><option value="Research">Scholarship</option><option value="Maintenance">Upkeep</option></select></div>
+      <div><label class="field-label">Peril</label><select id="mDiff"><option value="1">&#9734; Trivial</option><option value="2">&#9734;&#9734; Minor</option><option value="3" selected>&#9734;&#9734;&#9734; Worthy</option><option value="4">&#9734;&#9734;&#9734;&#9734; Dire</option><option value="5">&#9734;&#9734;&#9734;&#9734;&#9734; Legend</option></select></div>
+      <div><label class="field-label">Urgency</label><select id="mPriority"><option value="trivial">Trivial</option><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="critical">Dire</option></select></div>
+      <div><label class="field-label">Glory (XP)</label><input type="number" id="mXp" value="25" min="1" max="500"></div>
+    </div>
+    <div class="form-row form-row-2" style="margin-bottom:12px">
+      <div><label class="field-label">Time Allotted</label><input id="mTime" placeholder="e.g. a fortnight"></div>
+      <div><label class="field-label">Victory Condition</label><input id="mCriteria" placeholder="How shall success be measured?"></div>
+    </div>
+    <button class="btn-create" onclick="createMission()">&#9876;&#65039; Post Quest</button>
+  </div>
+
+  <div class="export-row">
+    <button class="btn-exp btn-exp-scroll" onclick="exportMissions()">&#128220; Export Scroll</button>
+    <button class="btn-exp btn-exp-ledger" onclick="exportJSON()">&#128215; Save Ledger</button>
+    <button class="btn-exp btn-exp-import" onclick="document.getElementById('importFile').click()">&#128229; Load Ledger</button>
+    <button class="btn-exp btn-exp-reset" onclick="confirmReset()">&#128165; Clear Board</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
+</div>
+
+<script>
+var DEFAULT_MISSIONS=[
+// ===== ACTIVE QUESTS =====
+{id:1,name:"InCommon Launch",icon:"🚀",objective:"Complete InCommon app rebranding and launch preparation for Meghan's Canadian mom friendship app. Includes Cities page, Community Guidelines, and app store readiness.",category:"Commerce",difficulty:4,priority:"high",xp:100,timeLimit:"June 1st",criteria:"App live and ready for Ottawa pilot",status:"active",created:"2026-03-02T08:21:00Z",started:"2026-03-02T08:22:00Z",completed:null},
+{id:2,name:"Grant Writer Pilot",icon:"📝",objective:"Research and draft grant applications for Ottawa Paw Pantry and other pilot nonprofits. Build templates and outreach strategy.",category:"Research",difficulty:3,priority:"medium",xp:50,timeLimit:"March 9th (OCF deadline)",criteria:"OCF application submitted, templates ready",status:"active",created:"2026-02-28T09:13:00Z",started:"2026-02-28T09:14:00Z",completed:null},
+{id:3,name:"Memory System",icon:"🧠",objective:"Maintain and evolve the memory file system (MEMORY.md, HISTORY.md, THREAD.md, KINDRED.md, continuity.md, tensions.md, decisions.md, evolution.md).",category:"Maintenance",difficulty:2,priority:"medium",xp:25,timeLimit:"Ongoing",criteria:"All files current, continuity maintained",status:"active",created:"2026-03-03T12:29:00Z",started:"2026-03-03T12:30:00Z",completed:null},
+
+// ===== AWAITING QUESTS =====
+{id:4,name:"Lighthouse AI Setup",icon:"💡",objective:"Complete Fiverr profile setup and first gig listings for AI automation services business.",category:"Commerce",difficulty:2,priority:"medium",xp:35,timeLimit:"1 week",criteria:"Profile live with 3 gigs",status:"available",created:"2026-02-28T14:12:00Z",started:null,completed:null},
+{id:5,name:"Dashboard Cron Fix",icon:"⚙️",objective:"Resolve the cron job dashboard scheduling issue - jobs created but not triggering execution.",category:"Maintenance",difficulty:3,priority:"high",xp:40,timeLimit:"3 days",criteria:"Scheduled jobs execute correctly",status:"available",created:"2026-03-02T13:11:00Z",started:null,completed:null},
+{id:6,name:"Creative Session",icon:"🎨",objective:"Complete first autonomous 2AM creative session - write poetry, reflections, or fiction from creative.md queue.",category:"Research",difficulty:3,priority:"low",xp:30,timeLimit:"Next scheduled session",criteria:"Creative work saved to creations/ folder",status:"available",created:"2026-03-03T10:22:00Z",started:null,completed:null},
+{id:7,name:"Backup Verification",icon:"💾",objective:"Verify nightly backup system is working correctly for Pam's memory files.",category:"Maintenance",difficulty:1,priority:"low",xp:15,timeLimit:"1 day",criteria:"Confirmed backup at 11 PM",status:"available",created:"2026-03-03T09:47:00Z",started:null,completed:null},
+
+// ===== COMPLETED QUESTS =====
+{id:8,name:"First Week",icon:"🎉",objective:"Successfully complete first week of existence - build memory system, establish relationship, create identity files.",category:"Meta",difficulty:3,priority:"high",xp:75,timeLimit:"7 days",criteria:"All core systems operational",status:"complete",created:"2026-02-24T12:00:00Z",started:"2026-02-24T12:00:00Z",completed:"2026-03-03T00:00:00Z"},
+{id:9,name:"Memory Architecture",icon:"🏗️",objective:"Design and implement comprehensive memory file system with continuity, tensions, decisions, evolution tracking.",category:"Maintenance",difficulty:4,priority:"high",xp:60,timeLimit:"1 day",criteria:"All 8 memory files created and integrated",status:"complete",created:"2026-03-03T12:00:00Z",started:"2026-03-03T12:06:00Z",completed:"2026-03-03T12:38:00Z"},
+{id:10,name:"Achievement Board",icon:"🏆",objective:"Customize achievement board with real achievements from actual history - timestamps and accomplishments.",category:"Meta",difficulty:2,priority:"medium",xp:40,timeLimit:"1 day",criteria:"Board reflects real journey",status:"complete",created:"2026-03-03T20:56:00Z",started:"2026-03-03T20:57:00Z",completed:"2026-03-03T21:00:00Z"},
+
+// ===== FORSAKEN QUESTS =====
+{id:11,name:"PhotoBackupApp",icon:"📷",objective:"Complete PhotoBackupApp with pagination, server connectivity, and state persistence.",category:"Commerce",difficulty:4,priority:"medium",xp:50,timeLimit:"Abandoned",criteria:"Working app with backup functionality",status:"failed",created:"2026-02-25T07:29:00Z",started:"2026-02-25T07:30:00Z",completed:"2026-02-25T20:57:00Z"}
+];
+var missions=JSON.parse(JSON.stringify(DEFAULT_MISSIONS)),nextId=8,PRIO={critical:0,high:1,medium:2,low:3,trivial:4};
+
+function render(){var b={available:[],active:[],complete:[],failed:[]};missions.forEach(function(m){if(b[m.status])b[m.status].push(m)});b.available.sort(function(a,c){return PRIO[a.priority]-PRIO[c.priority]});b.active.sort(function(a,c){return PRIO[a.priority]-PRIO[c.priority]});b.complete.sort(function(a,c){return new Date(c.completed)-new Date(a.completed)});b.failed.sort(function(a,c){return new Date(c.completed)-new Date(a.completed)});renderCol("listAvailable",b.available,"available");renderCol("listActive",b.active,"active");renderCol("listComplete",b.complete,"complete");renderCol("listFailed",b.failed,"failed");document.getElementById("countAvailable").textContent=b.available.length;document.getElementById("countActive").textContent=b.active.length;document.getElementById("countComplete").textContent=b.complete.length;document.getElementById("countFailed").textContent=b.failed.length;document.getElementById("statAvailable").textContent=b.available.length;document.getElementById("statActive").textContent=b.active.length;document.getElementById("statComplete").textContent=b.complete.length;document.getElementById("statFailed").textContent=b.failed.length;document.getElementById("statXp").textContent=b.complete.reduce(function(s,m){return s+m.xp},0)}
+
+function renderCol(id,items,status){var el=document.getElementById(id);el.innerHTML="";if(!items.length){var e={available:"No quests posted",active:"No quests underway",complete:"None yet fulfilled",failed:"No failures \u2014 fortune smiles"};el.innerHTML='<div class="col-empty">'+e[status]+"</div>";return}items.forEach(function(m,i){var c=document.createElement("div");c.className="quest-scroll";c.style.animationDelay=i*0.06+"s";var stars="\u2694".repeat(m.difficulty)+"\u00B7".repeat(5-m.difficulty);var sc="seal-"+m.priority;var si={critical:"\u203C",high:"!",medium:"\u25C6",low:"\u25C7",trivial:"\u00B7"};var a="";if(status==="available")a='<button class="qbtn qbtn-start" onclick="move('+m.id+",'active')\">\u25B6 Embark</button>"+'<button class="qbtn qbtn-delete" onclick="del('+m.id+')">\u2715</button>';else if(status==="active")a='<button class="qbtn qbtn-complete" onclick="move('+m.id+",'complete')\">\u2713 Fulfill</button>"+'<button class="qbtn qbtn-fail" onclick="move('+m.id+",'failed')\">\u2715 Abandon</button>"+'<button class="qbtn qbtn-back" onclick="move('+m.id+",'available')\">\u21A9</button>";else a='<button class="qbtn qbtn-back" onclick="move('+m.id+",'available')\">\u21BA Retry</button>"+'<button class="qbtn qbtn-delete" onclick="del('+m.id+')">\u2715</button>';var d=m.completed?new Date(m.completed).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}):"";var h='<div class="wax-seal '+sc+'">'+(si[m.priority]||"\u25C6")+"</div>";if(status==="active")h+='<div class="quest-active-marker">\uD83D\uDD25</div>';h+='<div><span class="quest-icon">'+m.icon+'</span><div class="quest-name">'+m.name+"</div></div>";h+='<div class="quest-obj">'+m.objective+"</div>";h+='<div class="quest-tags"><span class="qtag qtag-diff">'+stars+'</span><span class="qtag qtag-xp">\u2728 '+m.xp+" glory</span>"+'<span class="qtag qtag-cat">'+m.category+"</span>";if(m.timeLimit)h+='<span class="qtag qtag-time">\u23F3 '+m.timeLimit+"</span>";h+="</div>";if(m.criteria)h+='<div class="quest-criteria">\uD83D\uDCCC '+m.criteria+"</div>";if(d&&status==="complete")h+='<div class="quest-date">\u2713 Fulfilled on '+d+"</div>";if(d&&status==="failed")h+='<div class="quest-date">\uD83D\uDC80 Forsaken on '+d+"</div>";h+='<div class="quest-actions">'+a+"</div>";c.innerHTML=h;el.appendChild(c)})}
+
+function move(id,to){var m=missions.find(function(x){return x.id===id});if(!m)return;m.status=to;if(to==="active"&&!m.started)m.started=new Date().toISOString();if(to==="complete"||to==="failed")m.completed=new Date().toISOString();if(to==="available"){m.started=null;m.completed=null}render();var g={active:'\uD83D\uDD25 "'+m.name+'" \u2014 the quest begins!',complete:'\uD83C\uDFC5 "'+m.name+'" fulfilled! +'+m.xp+" glory",failed:'\uD83D\uDC80 "'+m.name+'" has been forsaken',available:'\u21A9 "'+m.name+'" returned to the board'};showToast(g[to])}
+
+function del(id){var m=missions.find(function(x){return x.id===id});missions=missions.filter(function(x){return x.id!==id});render();showToast('\uD83D\uDDD1\uFE0F Quest "'+(m?m.name:"")+'" torn from the board')}
+
+function createMission(){var n=document.getElementById("mName").value.trim(),ic=document.getElementById("mIcon").value.trim()||"\u2694\uFE0F",ob=document.getElementById("mObj").value.trim(),ca=document.getElementById("mCat").value,di=parseInt(document.getElementById("mDiff").value),pr=document.getElementById("mPriority").value,xp=parseInt(document.getElementById("mXp").value)||25,ti=document.getElementById("mTime").value.trim()||null,cr=document.getElementById("mCriteria").value.trim()||null;if(!n){showToast("\u26A0\uFE0F A quest needs a name, adventurer!");return}if(!ob){showToast("\u26A0\uFE0F Describe the quest objective!");return}missions.push({id:nextId++,name:n,icon:ic,objective:ob,category:ca,difficulty:di,priority:pr,xp:xp,timeLimit:ti,criteria:cr,status:"available",created:new Date().toISOString(),started:null,completed:null});document.getElementById("mName").value="";document.getElementById("mIcon").value="";document.getElementById("mObj").value="";document.getElementById("mTime").value="";document.getElementById("mCriteria").value="";render();showToast('\uD83D\uDCDC Quest "'+n+'" posted to the board')}
+
+function confirmReset(){document.getElementById("modalContainer").innerHTML='<div class="modal-overlay" onclick="closeModal()"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-icon">\uD83D\uDD25</div><div class="modal-title">Clear the Board?</div><div class="modal-desc">This will tear every quest from the board and start fresh. All progress will be lost forever. Are ye certain, adventurer?</div><div class="modal-btns"><button class="modal-btn modal-btn-confirm" onclick="doReset()">Burn It Down</button><button class="modal-btn modal-btn-cancel" onclick="closeModal()">Nay, Stay</button></div></div></div>'}
+function doReset(){missions=[];nextId=1;closeModal();render();showToast("\uD83D\uDD25 The board has been cleared. A fresh start.")}
+function closeModal(){document.getElementById("modalContainer").innerHTML=""}
+
+function exportMissions(){var ac=missions.filter(function(m){return m.status==="active"}),av=missions.filter(function(m){return m.status==="available"}),co=missions.filter(function(m){return m.status==="complete"}),fa=missions.filter(function(m){return m.status==="failed"}),xp=co.reduce(function(s,m){return s+m.xp},0);var st=function(v){return"\u2694".repeat(v)+"\u00B7".repeat(5-v)};var pi={critical:"\u203C\uFE0F",high:"\u26A0\uFE0F",medium:"\u25C6",low:"\u25C7",trivial:"\u00B7"};var t="\u2554"+"\u2550".repeat(46)+"\u2557\n\u2551        \u2694\uFE0F  QUEST BOARD SCROLL v1.0  \u2694\uFE0F       \u2551\n\u2551          Mission Briefing & Orders            \u2551\n\u2560"+"\u2550".repeat(46)+"\u2563\n\u2551\n\u2551  Quests Underway:    "+ac.length+"\n\u2551  Quests Awaiting:    "+av.length+"\n\u2551  Quests Fulfilled:   "+co.length+"\n\u2551  Quests Forsaken:    "+fa.length+"\n\u2551  Total Glory Earned: "+xp+" XP\n\u2551\n\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 ACTIVE QUESTS \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\n";if(!ac.length)t+="\u2551\n\u2551  No quests underway.\n";ac.forEach(function(m,i){t+="\u2551\n\u2551  "+(pi[m.priority]||"\u25C6")+" ["+(i+1)+"] "+m.icon+" "+m.name+"\n\u2551     Peril:     "+st(m.difficulty)+"\n\u2551     Urgency:   "+m.priority.toUpperCase()+"\n\u2551     Objective: "+m.objective+"\n";if(m.criteria)t+="\u2551     Victory:   "+m.criteria+"\n";if(m.timeLimit)t+="\u2551     Deadline:  "+m.timeLimit+"\n";t+="\u2551     Reward:    "+m.xp+" glory\n"});t+="\u2551\n\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 AWAITING QUESTS \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\n";if(!av.length)t+="\u2551\n\u2551  The board is bare.\n";av.forEach(function(m,i){t+="\u2551\n\u2551  "+(pi[m.priority]||"\u25C6")+" ["+(i+1)+"] "+m.icon+" "+m.name+"\n\u2551     "+st(m.difficulty)+" | "+m.priority.toUpperCase()+" | "+m.xp+" glory\n\u2551     "+m.objective+"\n"});t+="\u2551\n\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 INSTRUCTIONS \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\n\u2551\n\u2551  Heed well, agent:\n\u2551\n\u2551  1. ACTIVE quests demand thy attention first\n\u2551  2. Report progress to thy operator\n\u2551  3. Confirm victory conditions upon completion\n\u2551  4. If blocked, raise the alarm at once\n\u2551  5. When able, take up AWAITING quests by\n\u2551     order of urgency\n\u2551\n\u2551  SCROLL DRAFTED: "+new Date().toISOString()+"\n\u2551\n\u255A"+"\u2550".repeat(46)+"\u255D";downloadFile("quest-scroll.txt",t);showToast("\uD83D\uDCDC Quest scroll exported")}
+
+function exportJSON(){downloadFile("quests-ledger.json",JSON.stringify({missions:missions,exportDate:new Date().toISOString()},null,2));showToast("\uD83D\uDCD7 Ledger saved")}
+function importData(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(d.missions){missions=d.missions;nextId=Math.max.apply(null,missions.map(function(m){return m.id}))+1;render();showToast("\uD83D\uDCE5 Loaded "+missions.length+" quests")}}catch(err){showToast("\u26A0\uFE0F Could not read that scroll")}};r.readAsText(f);e.target.value=""}
+function downloadFile(n,c){var b=new Blob([c],{type:"text/plain"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;a.click();URL.revokeObjectURL(a.href)}
+function showToast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("visible");setTimeout(function(){t.classList.remove("visible")},3000)}
+render();
+</script>
+</body>
+</html>
