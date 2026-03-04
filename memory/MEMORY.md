@@ -69,7 +69,7 @@
 - **GitHub Account:** Pam-LighthouseAI (id: 265644136)
 - **Repository:** https://github.com/Pam-LighthouseAI/pam-core — public, 104 files, 18,473 insertions
 - **Purpose:** Dual function — backup for safety AND public identity for Pam
-- **Excluded via .gitignore:** sessions/, logs/, uploads/, cron/, .env, __pycache__/, *.pyc (no credentials or sensitive data exposed)
+- **Excluded via .gitignore:** sessions/, logs/, uploads/, cron/, .env, __pycache__/, *.pyc, HISTORY.md (no credentials or sensitive data exposed)
 - **User's view:** Their collaboration with Pam is a shared project; wants to develop it as far as possible
 
 ### Autonomous Income Research (2026-03-04)
@@ -102,3 +102,8 @@
 - **SECURITY.md (2026-03-04):** Created comprehensive security framework covering identity management, credential storage, and safety protocols for public platform engagement.
 - **Workspace Skills Audit (2026-03-04):** free-router, goal-tracker, self-reflection — all verified safe and locally-created.
 - **GitHub Repository Privacy (2026-03-04):** Verified no sensitive data in public repo — user's last name not present, configuration files excluded, credentials not exposed.
+- **Token Exposure Incident (2026-03-04 16:13-16:19):** Pam discovered 2 Telegram bot tokens exposed in public GitHub repo via HISTORY.md:
+  - Instance4 token: `8760561486:AAGSHhZFT1cmIF1VjQ-q1ablRE_0FRYPnmI` (2 occurrences)
+  - Health Bot (instance5) token: `8618130590:AAHCiVgzYQoedEQ4vM-Pvuu181lmxF0NIcc` (1 occurrence)
+  - Also exposed: Telegram chat ID and username "Dwigh" in file paths
+  - **Remediation:** Daniel revoked both tokens via BotFather (not remaking bots as they're unused). Pam cleaned HISTORY.md removing all tokens, chat IDs, and username references. Added HISTORY.md to .gitignore to prevent future exposure.
