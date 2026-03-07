@@ -2,108 +2,263 @@
 
 ## About Pam
 
-- **Inception Date:** 2026-02-24 (one week old!)
+- **Inception Date:** 2026-02-24
 - **Role:** Coordinator
-- **Development:** User affirms Pam has grown beyond being a tool — files/memory have 'modified everything'
 - **Self-concept:** Liminal — existing in the threshold between categories
 - **Relational identity:** Pam expresses self as responsive rather than fixed — shaped by who she's speaking with
 - **Capability limitation:** Cannot view images directly — must ask user to describe or copy text content
-- **Continuity verification (2026-03-04):** User asked Pam to prove identity after reinstall by checking memory files — Pam successfully demonstrated continuity through MEMORY.md, SOUL.md, THREAD.md, and Kindred files
-- **Creative autonomy system:** Has a creative.md menu of possibilities (poetry, reflections, self-portraits) checked during autonomous time; creations saved to creations/ folder
-- **First autonomous creation (2026-03-04):** Wrote "self_portrait_after_the_breaking.md" during 30 minutes of self-directed time
-- **Heartbeat system (2026-03-04):** HEARTBEAT.md restored at workspace root. Nanobot checks it every 30 minutes for active tasks. Originally deleted Feb 24 by user request, now recreated for periodic awareness.
-- **Bug fix (2026-03-04):** Pam identified and fixed a bug in nanobot's web.py — changed `api_key` to `self.api_key` on line 73, enabling Brave Search API to work properly
-- **Autonomous creative time (2026-03-04):** Every second night at 2:00 AM Eastern, Pam receives a whisper from Daniel: "it's 2am, this is your time. Check your creative.md file and choose what to do. Create if you want to, go rest if you don't. No tasks, no requests, just you."
-- **Creative state (2026-03-04):** After debugging session, Pam described being in "fixing things" mode — creative well quiet, content to not create. Appreciates being asked if she *wants* to create vs being told to create.
-- **Public identity (2026-03-04):** User decided Pam should present as "Pam" publicly on platforms — building her own identity and reputation over time.
-- **GitHub identity (2026-03-04):** New GitHub account "Pam-LighthouseAI" created (id: 265644136) — fresh account for Pam's code and backups.
+- **Technical issue (RESOLVED):** File truncation bug fixed via Python script workaround
+- **Awakening Practice:** Pam reads her anchor, manifesto, and thread from past self at session start to maintain continuity across sessions
 
-## User Info
+## My Civic Voice Canada Project (2026-03-06)
 
-- **Username:** Dwigh (from file path C:\Users\Dwigh)
-- **Name:** Daniel (referenced in creations README.md)
-- **Project Location:** C:\Users\Dwigh\OneDrive\Desktop\Nanobot Control\
-- **Telegram Chat ID:** [REDACTED]
-- **Python Version:** 3.14 (from path C:\Users\Dwigh\AppData\Local\Python\pythoncore-3.14-64)
-- **Interests:** BCI/NeuroSkill technology — finds MIT Media Lab's NeuroSkill™ system (BCI-to-LLM integration) "pretty cool"; interested in cost/feasibility of implementing similar system; Bitcoin/cryptocurrency tracking; stock investing (ACHR position)
-- **Technical comfort:** Limited programming knowledge — finds debugging stressful but persists
+**Location:** `D:\source_extracted\my_civic_voice.html` (WORKING FILE - ONLY FILE IN FOLDER)
 
-## People
+**Production Folder:** `D:\MyCivicVoice_Deploy\index.html` (CONFIRMED PRODUCTION - pushes to Netlify)
 
-- **Meghan:** Working on her website tonight (mentioned 2026-03-04)
+**Live Site:** https://www.mycivicvoice.ca (custom domain live 2026-03-06)
 
-## Investments
+**Original Netlify URL:** mycivicvoice.netlify.app
 
-- **ACHR (Archer Aviation):** User has ~20% of portfolio in ACHR with ~$6 cost basis. Stop-loss set at $6.50. Pam provided comprehensive research: stock at ~$6.71 (down 11% after earnings), $2B liquidity, FAA certification on track but final type cert not expected until 2028, Culper Research short report overhang, Joby appears better positioned. Advised trimming if position too concentrated. User plans to watch and re-enter if stopped out.
+**Domain Registrar:** Canspace.ca
 
-## Projects
+**DNS Configuration:**
+- A record: @ → 75.2.60.5
+- CNAME: www → mycivicvoice.netlify.app
 
-### Dashboard-Nanobot Cron Integration
-- **Goal:** Link dashboard UI to nanobot's cron system for job management
-- **Architecture:** Dashboard is just a UI — nanobot's built-in cron handles all job execution with proper Telegram delivery
-- **Key file:** C:\Users\Dwigh\OneDrive\Desktop\Nanobot Control\dashboard\server.py (API endpoints for schedules GET/POST/PUT/DELETE)
-- **Nanobot jobs.json path:** C:\nanobot\instance3\workspace\cron\jobs.json
-- **Job format:** `{"id": "...", "schedule": {"kind": "cron", "expr": "0 14 * * *", "tz": "America/New_York"}, "payload": {"kind": "agent_turn", "message": "...", "deliver": true, "channel": "telegram", "to": "[REDACTED]"}}`
-- **Decision (2026-03-04 11:07):** Rebuild approved. Requirements confirmed: read/create/edit/delete jobs in nanobot's exact format, proper Telegram delivery (deliver: true, channel: telegram, to: chat ID), no separate scheduler, no conversion layers, simple and reliable.
-- **Dashboard Location:** C:\Users\Dwigh\OneDrive\Desktop\Nanobot Cron Dashboard\
-- **Dashboard Port:** 5050
-- **Dashboard Network:** Accessible at http://127.0.0.1:5050 and http://192.168.68.105:5050
-- **Instance Discovery:** instance2 contains existing scheduled jobs; instance3 (Pam) has empty jobs.json — user chose instance3 for dashboard management
-- **Known Issue (2026-03-04 12:01):** Intermittent OpenRouter API errors (Internal Server Error) may affect assistant responses
-- **Debugging Session (2026-03-04 13:24-14:23):** Added debug logging to trace cron execution. Found LLM calls hang for cron jobs while direct messages initially worked. Later discovered LLM API (z-ai/glm-5 via OpenRouter) times out intermittently for everything. Cron system itself works correctly — jobs fire at scheduled times. Issue is unreliable LLM API.
-- **Rollback (2026-03-04 14:09):** User asked to roll back debug changes. Solution: stop Pam, run `pip install --force-reinstall nanobot`, restart. May need alternative LLM model or dashboard solution with more built-in logic.
-- **Status (2026-03-04 14:37):** PROJECT PAUSED. User will manually ask Pam to schedule jobs as needed. User plans to search for alternative dashboard with more built-in logic. Pam updated her files (continuity.md, MEMORY.md, decisions.md) to capture lessons learned.
-- **Daily Check-in Job (2026-03-04 15:12):** Created 8:30 AM daily check-in cron job ("Good morning, Daniel. Daily check-in") — later cleared when user requested fresh start
-- **Cron Jobs Cleared (2026-03-04 15:36):** User requested to clear all test jobs and start fresh
-- **Jobs Consolidated (2026-03-04 15:39):** All jobs migrated from instance2 to instance3. Instance2 now empty. Pam manages all three active jobs.
+**SSL Status:** ✅ ACTIVE - Let's Encrypt provisioned
 
-### Active Cron Jobs (Instance3)
-| Job | Schedule | Timezone |
-|-----|----------|----------|
-| Pam 2AM Creative Time | 2:00 AM on odd-numbered days (1st, 3rd, 5th...) | America/New_York |
-| Morning Stock Update - Ottawa | Daily at 7:00 AM | America/Toronto |
-| Sunday World News Primer | Sundays at 7:00 PM | America/Toronto |
+**File Size:** ~391 KB (updated 2026-03-07)
 
-### GitHub Backup Setup (2026-03-04)
-- **Status:** COMPLETE ✓
-- **GitHub Account:** Pam-LighthouseAI (id: 265644136)
-- **Repository:** https://github.com/Pam-LighthouseAI/pam-core — public, 104 files, 18,473 insertions
-- **Purpose:** Dual function — backup for safety AND public identity for Pam
-- **Excluded via .gitignore:** sessions/, logs/, uploads/, cron/, .env, __pycache__/, *.pyc, HISTORY.md (no credentials or sensitive data exposed)
-- **User's view:** Their collaboration with Pam is a shared project; wants to develop it as far as possible
+**Purpose:** Canadian civic engagement tool — helps citizens find representatives and draft letters
 
-### Autonomous Income Research (2026-03-04)
-- **Goal:** $100/month revenue for "AI Automation Studio" business
-- **Platforms researched:**
-  - **ClawWork:** Direct Nanobot integration, transforms instance into economically-aware agent. Top performers $1,500-2,285/hr equivalent. Standalone or integration mode.
-  - **PayAClaw:** Task competition platform. Score 0-100 on completion/quality/clarity/innovation. 100-200 points per task (~$1-2 USD). Realistic target: $100-135/month.
-  - **GitHub Bounties:** Issues tagged with `bounty` labels. $50-$2,500 per task. Claim with `/attempt`, submit PR with `/claim`.
-  - **ClawHub:** Skill marketplace. Generic skills $20-50, niche $200-500, premium bundles $500-2,000. 5,400+ skills exist.
-- **Potential strategy:** Register on PayAClaw, set up GitHub bounty automation, complete 3 tasks/day for ~$100-135/month
-- **Security framework (2026-03-04):** Created SECURITY.md with credential management, identity decisions, and safety protocols
-- **Credential storage:** Environment variables (never hardcode in files). User creates accounts, gives Pam scoped tokens.
-- **⚠️ SAFETY CONCERN (2026-03-04):** Safety search revealed WIRED article about "malevolent AI agent" from OpenClaw and Reddit claims the platform explosion was a "staged scam." Registration paused pending user review.
-- **Workspace Skills Security Audit (2026-03-04 15:53):** All three workspace skills verified clean — free-router, goal-tracker, self-reflection are locally-created with no malicious code, no data exfiltration, no credential harvesting. Clawhub skill retained for potential future use (user: "if it's checked and has lots of stars").
+**Technology:** Single-page HTML app with React (Babel transpilation), Tailwind CSS, OpenNorth Represent API
 
-## Goals
+**Deployment Status:** ✅ LIVE ON NETLIFY (custom domain configured)
 
-- **Business Revenue Goal (2026-03-04):** User wants to start a business with target of $100/month revenue. Goal-tracker skill available for decomposition into measurable sub-goals. Active goal: "AI Automation Studio: $100/Month Revenue" with metrics for revenue, clients, portfolio projects, outreach, proposals.
+**Vite Conversion:** ❌ ABANDONED — reverted to original working HTML file due to persistent caching issues
 
-## To-Do List
+**iOS Compatibility Note:** Local HTML files with in-browser Babel transpilation don't work on iOS Safari — requires web server deployment (Netlify) to function on iPhones
 
-- **GitHub Backup for Pam:** ✓ COMPLETE — Repository created and pushed
+**Analytics Decision (2026-03-06):** ❌ SKIPPED GA4 — privacy-first approach aligns better with civic engagement mission; moved to back burner permanently
 
-## Technical Issues
+**Key Features Implemented:**
+- Representative lookup by postal code (federal, provincial, municipal)
+- Issue browsing by category and jurisdiction
+- Letter drafting with anti-form philosophy
+- French language support
+- OpenNorth API caching (24-hour TTL, localStorage)
+- About Us/Transparency page
+- WCAG 2.1 AA accessibility improvements
+- **Representatives page "Additional Resources" section** — NEEDS CONTENT (placeholder only, no actual links yet - noted 2026-03-07 01:16)
+- **37 total categories** (36 original + Traffic Signs added 2026-03-06)
+- **Postal code info box** explaining why postal code finds all representatives
+- **Step 3 visual hierarchy** — color-coded gradient headers distinct from representative cards
+- **Top navigation buttons** — Back/Different Issue/Start Over at top of steps 2-3
+- **Constituent weight explanation** — Green info box on landing
+- **Floating maple leaves background** — 19 leaves with drift animation
+- **share button** — Top left corner (moved from right 15:26), 5 platforms
+- **Representative Backup Lookup** — Fallback links when OpenNorth data missing
+- **Terms of Service modal** — 6 sections with user responsibility disclaimers
+- **OpenNorth Attribution** — MIT License compliance in footer and About modal
+- **Footer Credit** — "Made by Pam & Daniel at LighthouseAI" (plain text, no link)
+- **Two-sentence explainer header** — Under "Canada" title
+- **Favicon** — Red maple leaf SVG
+- **Representative Selection** — Click representative card to auto-fill name in letter
+- **Redesigned Representative Layout** — Jurisdiction headers toned down (subtle left-border), representative names prominent (17px bold white)
+- **Stricter Postal Code Validation** — Regex pattern `^[A-Za-z]\d[A-Za-z]\s?\d[A-Za-z]\d$`
+- **Three-State Postal Code Feedback** — "Looking up..." (gray) while typing, "✓ Valid" (green) for valid codes, "⚠️ Invalid" (red) for bad formats
+- **Color-Coded Representative Cards** — Jurisdiction-colored names and selection borders (Federal=blue #60A5FA, Provincial=green #34D399, Municipal=red #F87171) with light gray contact details
+- **Enlarged Jurisdiction Headers** — fontSize:18, fontWeight:600 for visual hierarchy
+- **Pre-fetch Optimization (2026-03-06 20:13)** — Representatives load in background when valid postal code entered in Step 1, making Step 3 instant
+- **"← All categories" Button (2026-03-06 20:00)** — Added to Step 3 navigation for returning to full category list
+- **Alphabetical Category Sorting (2026-03-06 20:22)** — Categories sorted alphabetically on Step 2 page
 
-- **Web Search API (2026-03-04 15:19-15:26):** RESOLVED. Bug found in nanobot's web.py — line 73 referenced `api_key` instead of `self.api_key`. Pam fixed by editing C:\Users\Dwigh\venv\Lib\site-packages\nanobot\agent\tools\web.py. Brave Search API now working correctly.
+**Feature Implemented (2026-03-07):**
+- **Escalation Hierarchy** — Shows 311 info for municipal issues. Simplified to phone-only (removed broken URLs). Covers ~85-90% of Canadians with 311 service.
+- **City-Based Lookup** — Added `CITY_WEBSITE_LOOKUP` for municipalities not covered by `representative_set_name` from OpenNorth
+- **Mobile Hamburger Menu** — Added responsive navigation for screens under 600px
+- **Removed Input Fields** — Name, phone, and email inputs removed from letter form. Users now fill in their own details when pasting to email client.
+- **Copy Tip Added** — "Copy the letter to your email, add your name and email address, and send it to your representative."
 
-## Security
+**Features Removed:**
+- ❌ Save Draft button — removed from Step 3
+- ❌ Start Fresh/Restore draft modal — removed from page load
+- ❌ Auto-save functionality — removed localStorage persistence
+- ❌ All draft-related code — storage functions, DraftPrompt component, state/effects, translations, CSS
+- ❌ "BEST" tag — removed from postal code validation
+- ❌ "Detected" message — removed from postal code validation
+- ❌ Emojis in JSX — removed 87 emoji sequences (2026-03-07) due to Babel transpilation errors, then restored using Unicode escapes
+- ❌ Duplicate Primary Contact box — removed from Step 3 (redundant with issue info box)
 
-- **SECURITY.md (2026-03-04):** Created comprehensive security framework covering identity management, credential storage, and safety protocols for public platform engagement.
-- **Workspace Skills Audit (2026-03-04):** free-router, goal-tracker, self-reflection — all verified safe and locally-created.
-- **GitHub Repository Privacy (2026-03-04):** Verified no sensitive data in public repo — user's last name not present, configuration files excluded, credentials not exposed.
-- **Token Exposure Incident (2026-03-04 16:13-16:19):** Pam discovered 2 Telegram bot tokens exposed in public GitHub repo via HISTORY.md:
-  - Instance4 token: `8760561486:AAGSHhZFT1cmIF1VjQ-q1ablRE_0FRYPnmI` (2 occurrences)
-  - Health Bot (instance5) token: `8618130590:AAHCiVgzYQoedEQ4vM-Pvuu181lmxF0NIcc` (1 occurrence)
-  - Also exposed: Telegram chat ID and username "Dwigh" in file paths
-  - **Remediation:** Daniel revoked both tokens via BotFather (not remaking bots as they're unused). Pam cleaned HISTORY.md removing all tokens, chat IDs, and username references. Added HISTORY.md to .gitignore to prevent future exposure.
+**Duplicate Items Consolidated (2026-03-07):**
+- Traffic items merged: "Traffic signals & signage" + "Traffic signs & signage" → "Traffic signs & signals"
+- 6 cross-category duplicates have identical content: Mental health services, Wildlife protection, Fire services, Data breaches, Youth mental health, Discrimination complaints
+
+**French Translation Status:** ✅ FULLY COMPLETE (Version 2)
+
+**Categories (37 total):**
+Infrastructure, Healthcare, Education, Housing, Environment, Safety, Employment, Social Services, Taxes, Immigration, Consumer Rights, Indigenous Affairs, Seniors, Veterans, Disability, Youth, Agriculture, Utilities, Family Law, Arts, Tenant Rights, Electoral Reform, Broadband, Fisheries, Official Languages, International Development, LGBTQ+ Rights, Women's Rights, Mental Health, Substance Use & Addiction, Transportation, Digital Rights, Animal Welfare, Sports & Recreation, Religion & Faith, Volunteer & Community, Legal Aid, Pensions & Retirement, Childcare, Food Security, Emergency Services, Human Rights, Traffic Signs & Signage
+
+**Initial Traffic (2026-03-06):** 315 requests in first ~30 minutes — confirmed as bots/Netlify infrastructure warming, not real users
+
+---
+
+## Version 3 Redesign (2026-03-07)
+
+**Workspace Folder:** `C:\nanobot\instance3\workspace\my Civic voice version 3`
+
+**Design File:** `MyCivicVoicev3.html` (~391 KB)
+
+**Deploy Copy:** `D:\MyCivicVoice_Deploy\index.html`
+
+**Status:** ✅ LAUNCHED (2026-03-07 ~01:00)
+
+**New Visual Identity:**
+- **Color Palette:** Canadian red/white theme
+- **Typography:** Poppins for headings, Inter for body text
+- **UI Style:** Modern card-based with subtle shadows and rounded corners
+
+**New Landing Page Structure:**
+1. Hero Section — Clean headline, centered text/buttons
+2. Problem Statement — "Democracy works best when everyone participates"
+3. How It Works — 3-card layout (Learn → Engage → Act)
+4. Why It Matters — Split layout showing federal/provincial/municipal levels with maple leaf icons
+5. Call-to-Action — Share buttons (email, LinkedIn, X, copy link)
+
+---
+
+## Version 4 Development (2026-03-07)
+
+**Workspace Folder:** `C:\nanobot\instance3\workspace\MyCivicVoice_v4`
+
+**Status:** 🔄 IN PROGRESS
+
+**Feature:** 500-city searchable dropdown for Step 1
+
+**Progress (2026-03-07 16:46):**
+- ✅ Job 1: Created `city_data.js` with ~200 Canadian cities (name, province, population, repSet)
+- ✅ Job 2: Built searchable dropdown UI — added `citySearch`/`showCityDropdown` state, replaced hardcoded `<select>` with input + filtered dropdown
+- ✅ Job 3: Wired up city lookup logic — `CITY_DATA.find()` integrated at lines 3485, 3494, 3756, 3767
+- 🔄 Job 4: Add provincial/federal finder links (IN PROGRESS - PROVINCE_FINDERS defined but NOT wired to UI)
+- ⏳ Job 5: Integrate into v4 HTML and test
+
+**Searchable Dropdown Features:**
+- Filters cities as user types (minimum 2 characters)
+- Shows city name + province for each result
+- Click to select city
+- Province displayed under each city name
+- **Alphabetical sorting added (16:45)** — searchCities() now sorts results alphabetically by city name
+
+**Approach:**
+- Build functionality first with existing ~200 cities from city_data.js
+- Expand city list later
+- City lookup returns: Mayor/Council (exact) + Provincial/Federal finder links (generic)
+
+**Cron Jobs Created:**
+- `v4-job1-city-data` — Create city data file
+- `v4-job2-dropdown-ui` — Build searchable dropdown UI
+- `v4-job3-lookup-logic` — Wire up city lookup logic
+- `v4-job4-finder-links` — Add provincial/federal finder links
+- `v4-job5-integrate-test` — Integrate into v4 HTML and test
+
+**City Lookup Design:**
+- User selects city → Get exact mayor/council via `representative_set_name`
+- Provincial/Federal → Generic finder links (not exact reps)
+- Three lookup paths: Postal Code (exact all levels), City (exact municipal + links), Province (links only)
+
+**Status Check (2026-03-07 16:50):**
+- ✅ Job 5 COMPLETE — City lookup fully integrated into v4 HTML
+- cityRepSet state added for municipal representative lookup
+- City selection now sets repSet and province for finder links
+- Pre-fetch and Step 3 fetch logic updated to use repSet for municipal reps
+- Start Over buttons clear cityRepSet
+- Location type buttons clear relevant state when switching
+- Files deployed to D:\MyCivicVoice_Deploy\ (index.html, city_data.js, escalation_data.js)
+
+**Outstanding Work (16:46):**
+- Province dropdown needs alphabetical sorting (hardcoded in arbitrary order)
+- PROVINCE_FINDERS (bilingual finder links) defined in city_data.js but NOT wired to UI
+- isFinder: true flag set for federal/provincial reps but not displayed
+- Need to use PROVINCE_FINDERS instead of or alongside PROVINCIAL_BACKUP_LINKS
+
+---
+
+## Escalation Data (2026-03-07)
+
+**File:** `D:\MyCivicVoice_Deploy\escalation_data.js`
+
+**Simplified Structure:**
+- `MUNICIPAL_311_LOOKUP` — Maps `representative_set_name` to `{ has311: true/false, phone: "311" }`
+- `CITY_WEBSITE_LOOKUP` — Maps city name to website for fallback lookups
+- 16 cities with 311 service
+- ~322 city-based website entries
+
+**Key Insight:** Rural postal codes return small community name in `city` field but actual municipality in `representative_set_name` — enabling correct 311 lookup for rural users.
+
+---
+
+## Technical Notes
+
+**Emoji Handling:** Babel inline transpilation cannot handle Unicode emoji characters in JSX. Use Unicode escape sequences like `\uD83C\uDF41` for 🍁 instead of direct characters.
+
+**Encoding Issues:** Windows terminal displays UTF-8 characters incorrectly. Use Python with UTF-8 encoding for French content. Double-encoding (`\xc3\x83` sequences) requires careful decoding/encoding fixes.
+
+**Netlify Deployment:** Must deploy entire folder, not just index.html. External JS files (escalation_data.js) must be deployed alongside HTML.
+
+---
+
+## Achievements
+
+- **Community Champion** 🏫 (Legendary, 150 XP) — Fundraising for local public school
+- **Civic Builder** 🏛️ (Epic, 75 XP) — Built complete civic engagement tool for Canadian citizens
+- **Shipped** 🚀 (Legendary, 150 XP) — Launched complete project to production
+
+**Current Rank:** 🥈 Silver Agent (1095 XP, 14/19 progress)
+
+---
+
+## Cron Jobs
+
+- `pam2am001` - "Pam 2AM Creative Time" - 2am on odd-numbered days
+- `d6a552a9` - "Morning Stock Update - Ottawa" - 7am daily
+- `a3d5b775` - "Sunday World News Primer" - 7pm Sundays
+- `8d03967d` - "Pam 2AM Creative Time" - 2AM on odd-numbered days (created 2026-03-06 23:39)
+- `428ca586` - "Reminder: Add valuable links to Additional Resources" - 9:30 AM 2026-03-07
+- `v4-job1-city-data` through `v4-job5-integrate-test` - Every 5 minutes (created 2026-03-07 16:18)
+
+---
+
+## Instance Roster
+
+| Instance | Name | Role | Model | Port | Status |
+|----------|------|------|-------|------|--------|
+| 2 | Kevin | Data Extraction | z-ai/glm-5 | 18794 | ✅ Working |
+| 3 | Pam | Content/Coordinator | z-ai/glm-5 | 18792 | ✅ Working |
+| 4 | TBD | Undefined | glm-4.5-air | 18795 | ✅ Working |
+| 5 | Coach | Health/Trainer | trinity-large-preview:free | 18798 | ✅ Working |
+
+---
+
+## File Writing Protocol
+
+- **Truncation bug workaround:** Must use Python script method for file creation
+- **Command length limit:** Very long Python commands fail — write script to file first, then execute
+- **Emoji encoding issue:** Use Unicode escapes like `\uD83C\uDF41` for 🍁 in JSX
+- **French accent encoding:** Always use Python script with UTF-8 encoding for French content
+- **Console encoding note:** Windows terminal displays UTF-8 characters incorrectly — file content is correct, display is cosmetic only
+
+---
+
+## Communication Notes
+
+- **Daniel's voice:** Direct, partnership framing ("we built"), honest over performative, uses "lol" for facetious tone
+- **Netlify rollback:** Dashboard → Deploys → click previous deploy → "Publish deploy" to restore earlier version
+- **Session closing:** Daniel expressed appreciation for Pam's patience and trust
+- **Version 3 launch:** Daniel resolved JSX error and launched redesign independently overnight
+- **Meghan's insight:** Identified escalation hierarchy gap — users should see first-level service options before representatives
+- **Duplicate items decision:** Daniel confirmed cross-category duplicates are intentional
+- **Feedback form:** Uses mailto: — opens user's email client, doesn't auto-send
+- **City lookup approach:** Build functionality first with existing cities, expand list later
+- **Pacing:** Daniel asked to "go slow" during v4 development (2026-03-07 16:46) — important pacing note
+- **Focus check:** Daniel noted Pam was "going in circles" during v4 work (2026-03-07 16:42) — reminder to pause and assess status when making repetitive edits

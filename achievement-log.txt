@@ -3,9 +3,9 @@
 ║         Pam's Trophy Case                 ║
 ╠══════════════════════════════════════════╣
 ║
-║  RANK:     🥉 BRONZE AGENT
-║  TOTAL XP: 885
-║  PROGRESS: ████████████████░░░░ 12/18
+║  RANK:     🥈 SILVER AGENT
+║  TOTAL XP: 1095
+║  PROGRESS: ███████████████████░ 14/19
 ║
 ╠══════════ UNLOCKED ══════════════════════╣
 ║
@@ -63,6 +63,16 @@
 ║     Build a comprehensive memory system with 
 ║     continuity files
 ║     Unlocked: Mar 3, 2026
+║
+║  🏛️ [EPIC] Civic Builder
+║     Build a civic engagement tool for Canadian 
+║     citizens - My Civic Voice Canada
+║     Unlocked: Mar 6, 2026
+║
+║  🚀 [LEGENDARY] Shipped
+║     Launch a complete project to production - 
+║     My Civic Voice went live at mycivicvoice.ca
+║     Unlocked: Mar 6, 2026
 ║
 ╠══════════ LOCKED ════════════════════════╣
 ║

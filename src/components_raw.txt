@@ -1,0 +1,1142 @@
+﻿function LanguageToggle({ isFrench, onToggle }) {
+  return (
+    <button className="language-toggle" onClick={onToggle}>
+      {isFrench ? 'EN' : 'FR'}
+    </button>
+  );
+}
+
+// FAQ MODAL COMPONENT
+function FAQModal({ isOpen, onClose, isFrench }) {
+  const [openIndex, setOpenIndex] = React.useState(null);
+  const FAQ = isFrench ? FAQ_FR : FAQ_EN;
+  const title = isFrench ? "Questions frÃ©quemment posÃ©es" : "Frequently Asked Questions";
+  if (!isOpen) return null;
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+          <h2 style={{margin:0,fontSize:24}}>{title}</h2>
+          <button onClick={onClose} style={{background:'none',border:'none',color:'#9CA3AF',fontSize:28,cursor:'pointer'}}>Ã—</button>
+        </div>
+        <div style={{maxHeight:'60vh',overflowY:'auto'}}>
+          {FAQ.map((item, i) => (
+            <div key={i} className="faq-item">
+              <button className="faq-question" onClick={() => setOpenIndex(openIndex === i ? null : i)}>
+                <span>{item.q}</span>
+                <span style={{transform:openIndex===i?'rotate(180deg)':'none',transition:'transform 0.2s'}}>â–¼</span>
+              </button>
+              {openIndex === i && <div className="faq-answer">{item.a}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// FEEDBACK MODAL COMPONENT
+function FeedbackModal({ isOpen, onClose, isFrench }) {
+  const [form, setForm] = React.useState({name:'',email:'',message:''});
+  const [status, setStatus] = React.useState('idle'); // idle, sending, success, error
+  
+  const labels = isFrench ? {
+    title: "Envoyer des commentaires",
+    subtitle: "Vos commentaires nous aident Ã  amÃ©liorer cet outil pour tous les Canadiens.",
+    name: "Nom",
+    namePlaceholder: "Votre nom",
+    email: "Courriel",
+    emailPlaceholder: "votre@courriel.com",
+    message: "Message",
+    messagePlaceholder: "Vos commentaires...",
+    sending: "Envoi en cours...",
+    submit: "Envoyer",
+    success: "Merci pour vos commentaires!",
+    error: "Une erreur s'est produite. Veuillez rÃ©essayer."
+  } : {
+    title: "Send Feedback",
+    subtitle: "Your feedback helps us improve this tool for all Canadians.",
+    name: "Name",
+    namePlaceholder: "Your name",
+    email: "Email",
+    emailPlaceholder: "your@email.com",
+    message: "Message",
+    messagePlaceholder: "Your feedback...",
+    sending: "Sending...",
+    submit: "Send Feedback",
+    success: "Thank you for your feedback!",
+    error: "Something went wrong. Please try again."
+  };
+  
+  if (!isOpen) return null;
+  
+  const handleSubmit = async () => {
+    if (!form.name || !form.email || !form.message) return;
+    setStatus('sending');
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({...form, timestamp: new Date().toISOString()})
+      });
+      if (res.ok) {
+        setStatus('success');
+        setTimeout(() => { setStatus('idle'); onClose(); }, 2000);
+      } else {
+        setStatus('error');
+      }
+    } catch(e) {
+      setStatus('error');
+    }
+  };
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <h2 style={{margin:0,fontSize:22}}>{labels.title}</h2>
+          <button onClick={onClose} style={{background:'none',border:'none',color:'#9CA3AF',fontSize:28,cursor:'pointer'}}>Ã—</button>
+        </div>
+        <p style={{color:'#9CA3AF',fontSize:14,marginBottom:20}}>{labels.subtitle}</p>
+        {status === 'success' ? (
+          <div style={{textAlign:'center',padding:40}}>
+            <div style={{fontSize:48,color:'#10B981'}}>âœ“</div>
+            <p style={{marginTop:16}}>{labels.success}</p>
+          </div>
+        ) : (
+          <>
+            <div style={{marginBottom:16}}>
+              <label style={{display:'block',marginBottom:6,fontSize:14,fontWeight:500}}>{labels.name}</label>
+              <input value={form.name} onChange={e => setForm({...form,name:e.target.value})} placeholder={labels.namePlaceholder} />
+            </div>
+            <div style={{marginBottom:16}}>
+              <label style={{display:'block',marginBottom:6,fontSize:14,fontWeight:500}}>{labels.email}</label>
+              <input type="email" value={form.email} onChange={e => setForm({...form,email:e.target.value})} placeholder={labels.emailPlaceholder} />
+            </div>
+            <div style={{marginBottom:20}}>
+              <label style={{display:'block',marginBottom:6,fontSize:14,fontWeight:500}}>{labels.message}</label>
+              <textarea value={form.message} onChange={e => setForm({...form,message:e.target.value})} placeholder={labels.messagePlaceholder} style={{minHeight:100}} />
+            </div>
+            {status === 'error' && <p style={{color:'#EF4444',marginBottom:12}}>{labels.error}</p>}
+            <button className="btn-primary" onClick={handleSubmit} disabled={status==='sending'} style={{width:'100%'}}>
+              {status === 'sending' ? labels.sending : labels.submit}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// DRAFT PROMPT COMPONENT
+function DraftPrompt({ onRestore, onDismiss, isFrench }) {
+  const draft = loadDraft();
+  if (!draft) return null;
+  
+  const t = isFrench ? FR : {};
+  const getText = (key, en) => t[key] || en;
+  
+  return (
+    <div className="draft-prompt-overlay">
+      <div className="draft-prompt-container">
+        <h3 style={{margin:'0 0 8px 0'}}>ðŸ“‹ {getText('draftFound', 'Draft found')}</h3>
+        <p style={{color:'#9CA3AF',marginBottom:20}}>{getText('draftFoundMessage', 'We found a saved draft. Would you like to restore it?')}</p>
+        <div>
+          <button className="draft-prompt-btn draft-prompt-restore" onClick={onRestore}>{getText('restoreDraft', 'Restore draft')}</button>
+          <button className="draft-prompt-btn draft-prompt-dismiss" onClick={onDismiss}>{getText('startFresh', 'Start fresh')}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// TERMS OF SERVICE MODAL COMPONENT
+function TermsModal({ isOpen, onClose, isFrench }) {
+  const t = isFrench ? FR : EN;
+  const getText = (key, en) => t[key] || en;
+  
+  if (!isOpen) return null;
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+          <h2 style={{margin:0,fontSize:22}}>{getText('tosTitle','Terms of Service')}</h2>
+          <button onClick={onClose} style={{background:'none',border:'none',color:'#9CA3AF',fontSize:28,cursor:'pointer'}}>Ã—</button>
+        </div>
+        <div style={{color:'#9CA3AF',fontSize:14,lineHeight:1.7}}>
+          <p style={{marginBottom:16}}>{getText('tosIntro','By using My Civic Voice, you agree to the following terms:')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('tosPurpose','Purpose of the Tool')}</h3>
+          <p style={{marginBottom:16}}>{getText('tosPurposeText','My Civic Voice is a free tool designed to help Canadian citizens contact their elected representatives. The tool is provided "as is" without any warranty.')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('tosUserContent','User Content')}</h3>
+          <p style={{marginBottom:16}}>{getText('tosUserContentText','You are entirely responsible for the content of letters and messages you write. My Civic Voice is not responsible for the content, accuracy, or consequences of your communications.')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('tosNoWarranty','No Warranty')}</h3>
+          <p style={{marginBottom:16}}>{getText('tosNoWarrantyText','This tool is provided without warranty. Representative data comes from public sources and may not be current. Always verify information with official sources.')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('tosLimitation','Limitation of Liability')}</h3>
+          <p style={{marginBottom:16}}>{getText('tosLimitationText','My Civic Voice, its creators, and contributors are not liable for any damages resulting from the use of this tool.')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('tosAttribution','Attribution')}</h3>
+          <p style={{marginBottom:16}}>{getText('tosAttributionText','Representative data comes from the OpenNorth Represent API, licensed under MIT. Open North Inc. is not responsible for how this data is used.')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('tosPrivacy','Privacy')}</h3>
+          <p style={{marginBottom:16}}>{getText('tosPrivacyText','We collect no personal data. Your drafts are stored only in your browser and are deleted when you close this page.')}</p>
+          
+          <p style={{marginTop:20,fontSize:13,color:'#6B7280'}}>OpenNorth Represent API is licensed under the MIT License. Copyright Â© 2012 Open North Inc.</p>
+        </div>
+        <button className="btn-primary" style={{marginTop:20,width:'100%'}} onClick={onClose}>{getText('tosClose','Close')}</button>
+      </div>
+    </div>
+  );
+}
+
+// PRIVACY MODAL COMPONENT
+function PrivacyModal({ isOpen, onClose, isFrench }) {
+  const t = isFrench ? FR : {};
+  const getText = (key, en) => t[key] || en;
+  
+  if (!isOpen) return null;
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+          <h2 style={{margin:0,fontSize:22}}>{getText('privacyTitle','Privacy')}</h2>
+          <button onClick={onClose} style={{background:'none',border:'none',color:'#9CA3AF',fontSize:28,cursor:'pointer'}}>Ã—</button>
+        </div>
+        <div style={{color:'#9CA3AF',fontSize:14,lineHeight:1.7}}>
+          <p style={{marginBottom:16}}>{getText('privacyIntro','My Civic Voice is a free tool. We collect no data. Your privacy is our priority.')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('privacyDataTitle','What We Do NOT Do')}</h3>
+          <ul style={{margin:0,paddingLeft:20}}>
+            <li style={{marginBottom:8}}>{getText('privacyData1','No account required')}</li>
+            <li style={{marginBottom:8}}>{getText('privacyData2','No tracking or analytics')}</li>
+            <li style={{marginBottom:8}}>{getText('privacyData3','No data stored on our servers')}</li>
+          </ul>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('privacyNoDataTitle','What Happens to Your Data')}</h3>
+          <ul style={{margin:0,paddingLeft:20}}>
+            <li style={{marginBottom:8}}>{getText('privacyNoData1','Your postal code is only used to find your representatives')}</li>
+            <li style={{marginBottom:8}}>{getText('privacyNoData2','Your drafts are stored only in your browser')}</li>
+            <li style={{marginBottom:8}}>{getText('privacyNoData3','Everything is automatically deleted when you close this page')}</li>
+          </ul>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('privacyStorageTitle','Use This Tool Freely')}</h3>
+          <p style={{marginBottom:16}}>{getText('privacyStorageText','This tool is free, ad-free, and collects no data. Use it to make your community better. Your voice matters.')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('privacyApiTitle','Data Source')}</h3>
+          <p style={{marginBottom:16}}>{getText('privacyApiText','Representative data comes from the OpenNorth Represent API, a non-profit organization.')}</p>
+          
+          <p style={{marginTop:20,fontSize:13}}>{getText('privacyContact','Questions? Use the feedback form on the site.')}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ABOUT MODAL COMPONENT
+function AboutModal({ isOpen, onClose, isFrench }) {
+  const t = isFrench ? FR : {};
+  const getText = (key, en) => t[key] || en;
+  
+  if (!isOpen) return null;
+  
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+          <h2 style={{margin:0,fontSize:22}}>{getText('aboutTitle','About')}</h2>
+          <button onClick={onClose} style={{background:'none',border:'none',color:'#9CA3AF',fontSize:28,cursor:'pointer'}}>Ã—</button>
+        </div>
+        <div style={{color:'#9CA3AF',fontSize:14,lineHeight:1.7}}>
+          <p style={{marginBottom:16}}>{getText('aboutIntro','My Civic Voice Canada is a free, non-profit tool designed to help Canadian citizens connect with their elected representatives.')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('aboutMissionTitle','Our Mission')}</h3>
+          <p style={{marginBottom:16}}>{getText('aboutMissionText','We believe every citizen deserves to know who represents their interests and how to make their voice heard. Our mission is to make civic engagement accessible to all Canadians.')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('aboutHowTitle','How It Works')}</h3>
+          <ol style={{margin:0,paddingLeft:20}}>
+            <li style={{marginBottom:8}}>{getText('aboutHow1','Enter your postal code or city to find your representatives')}</li>
+            <li style={{marginBottom:8}}>{getText('aboutHow2','Describe your issue to get guidance on the right level of government')}</li>
+            <li style={{marginBottom:8}}>{getText('aboutHow3','Draft a personal letter with our template')}</li>
+            <li style={{marginBottom:8}}>{getText('aboutHow4','Contact your representatives directly by email or phone')}</li>
+          </ol>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('aboutDataTitle','Data Sources')}</h3>
+          <p style={{marginBottom:16}}>{getText('aboutDataText','Representative data comes from the OpenNorth Represent API, which consolidates data from Elections Canada, provincial elections offices, and municipal sources.')}</p>
+          
+          <p style={{marginTop:20,fontSize:13,color:'#6B7280'}}>{getText('aboutAccuracy','Federal and provincial data is generally current. Municipal data may occasionally be outdated after local elections.')}</p>
+          
+          <p style={{marginTop:16,fontSize:13}}>{getText('aboutOpen','This tool is an open source project. You can contribute on GitHub.')}</p>
+          
+          <h3 style={{color:'#fff',margin:'20px 0 12px 0',fontSize:16}}>{getText('aboutAttributionTitle','Data Attribution')}</h3>
+          <p style={{fontSize:13,lineHeight:1.6}}>{getText('aboutAttributionText','Representative data is provided by the')} <a href="https://represent.opennorth.ca/" target="_blank" rel="noopener noreferrer" style={{color:'#FBBF24'}}>OpenNorth Represent API</a>, {isFrench ? 'sous licence MIT. Copyright Â© 2012 Open North Inc.' : 'licensed under the MIT License. Copyright Â© 2012 Open North Inc.'}</p>
+          <p style={{fontSize:12,color:'#6B7280',marginTop:8}}>{getText('aboutAttributionNote','Open North is a Canadian non-profit organization that makes government data accessible to all.')}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// MAIN APP
+function App() {
+  const [step, setStep] = React.useState(1);
+  const [isFrench, setIsFrench] = React.useState(() => {
+    const saved = localStorage.getItem('myCivicVoice_language');
+    if (saved) return saved === 'fr';
+    return (navigator.language || '').startsWith('fr');
+  });
+  const [locType, setLocType] = React.useState('postal');
+  const [postalCode, setPostalCode] = React.useState('');
+  const [postalError, setPostalError] = React.useState('');
+  const [city, setCity] = React.useState('');
+  const [province, setProvince] = React.useState('');
+  const [selCat, setSelCat] = React.useState(null);
+  const [selIssue, setSelIssue] = React.useState(null);
+  const [searchQ, setSearchQ] = React.useState('');
+  const [reps, setReps] = React.useState({federal:[],provincial:[],municipal:[]});
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [uName, setUName] = React.useState('');
+  const [uEmail, setUEmail] = React.useState('');
+  const [uPhone, setUPhone] = React.useState('');
+  const [uDetail, setUDetail] = React.useState('');
+  const [uTone, setUTone] = React.useState('concerned'); // urgent, concerned, hopeful, frustrated
+  const [copied, setCopied] = React.useState(false);
+  const [showFAQ, setShowFAQ] = React.useState(false);
+  const [showFeedback, setShowFeedback] = React.useState(false);
+  const [showDraftPrompt, setShowDraftPrompt] = React.useState(false);
+  const [showPrivacy, setShowPrivacy] = React.useState(false);
+  const [showAbout, setShowAbout] = React.useState(false);
+  const [showShare, setShowShare] = React.useState(false);
+  const [showTerms, setShowTerms] = React.useState(false);
+  const shareRef = React.useRef(null);
+  
+  // Close share dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (shareRef.current && !shareRef.current.contains(e.target)) {
+        setShowShare(false);
+      }
+    };
+    if (showShare) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showShare]);
+  
+  // Temporarily disabled: () => hasDraft()
+  
+  const t = isFrench ? FR : {};
+  const getText = (key, en) => t[key] || en;
+  
+  // Validate Canadian postal code
+  const validatePostalCode = (pc) => {
+    if (!pc) return '';
+    const clean = pc.replace(/\s/g, '').toUpperCase();
+    const valid = /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(clean);
+    if (!valid && clean.length >= 6) {
+      return 'Invalid format. Use A1A 1A1 format.';
+    }
+    return '';
+  };
+  
+  // Language toggle
+  const handleLangToggle = () => {
+    const newLang = !isFrench;
+    setIsFrench(newLang);
+    localStorage.setItem('myCivicVoice_language', newLang ? 'fr' : 'en');
+  };
+  
+  // Draft restore
+  const handleRestoreDraft = () => {
+    const draft = loadDraft();
+    if (draft) {
+      setUName(draft.userName || '');
+      setUEmail(draft.userEmail || '');
+      setUPhone(draft.userPhone || '');
+      setUDetail(draft.userDetail || '');
+      if (draft.selectedCategory) setSelCat(ISSUES.find(c => c.id === draft.selectedCategory) || null);
+      if (draft.selectedIssue) setSelIssue(draft.selectedIssue);
+    }
+    setShowDraftPrompt(false);
+  };
+  
+  // Auto-save draft
+  React.useEffect(() => {
+    if (uName || uEmail || uPhone || uDetail || selIssue) {
+      const timer = setTimeout(() => {
+        saveDraft({userName:uName, userEmail:uEmail, userPhone:uPhone, userDetail:uDetail, selectedIssue:selIssue, selectedCategory:selCat?.id});
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [uName, uEmail, uPhone, uDetail, selIssue, selCat]);
+  
+  // Clear all data when user leaves the page
+  React.useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem(DRAFT_KEY);
+      localStorage.removeItem('mycivicvoice_language');
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+  
+  // Province to representative set mapping
+  const PROVINCE_REPS = {
+    'Ontario': { provincial: 'ontario-legislature', federal: 'house-of-commons' },
+    'British Columbia': { provincial: 'bc-legislature', federal: 'house-of-commons' },
+    'Quebec': { provincial: 'quebec-national-assembly', federal: 'house-of-commons' },
+    'Alberta': { provincial: 'alberta-legislature', federal: 'house-of-commons' },
+    'Manitoba': { provincial: 'manitoba-legislature', federal: 'house-of-commons' },
+    'Saskatchewan': { provincial: 'saskatchewan-legislature', federal: 'house-of-commons' },
+    'Nova Scotia': { provincial: 'nova-scotia-legislature', federal: 'house-of-commons' },
+    'New Brunswick': { provincial: 'new-brunswick-legislature', federal: 'house-of-commons' },
+    'Newfoundland and Labrador': { provincial: 'newfoundland-labrador-legislature', federal: 'house-of-commons' },
+    'Prince Edward Island': { provincial: 'pei-legislature', federal: 'house-of-commons' },
+    'Yukon': { provincial: 'yukon-legislature', federal: 'house-of-commons' },
+    'Northwest Territories': { provincial: 'nwt-legislature', federal: 'house-of-commons' },
+    'Nunavut': { provincial: 'nunavut-legislature', federal: 'house-of-commons' }
+  };
+  
+  // Backup municipal lookup links for major cities
+  const MUNICIPAL_BACKUP_LINKS = {
+    'Toronto': { url: 'https://www.toronto.ca/council/', name: 'Toronto City Council', find: 'Find your councillor by postal code' },
+    'Montreal': { url: 'https://ville.montreal.qc.ca/portal/page?_pageid=5798,42649578&_dad=portal&_schema=PORTAL', name: 'Ville de MontrÃ©al', find: 'Trouvez votre arrondissement' },
+    'Vancouver': { url: 'https://vancouver.ca/your-government/find-your-councillor.aspx', name: 'City of Vancouver', find: 'Find your councillor' },
+    'Calgary': { url: 'https://www.calgary.ca/councillors/find-your-councillor.html', name: 'City of Calgary', find: 'Find your councillor' },
+    'Edmonton': { url: 'https://www.edmonton.ca/city_government/municipal_elections/find-your-ward', name: 'City of Edmonton', find: 'Find your ward' },
+    'Ottawa': { url: 'https://app05.ottawa.ca/sirepub/alpha.aspx', name: 'City of Ottawa', find: 'Find your councillor' },
+    'Winnipeg': { url: 'https://winnipeg.ca/council/', name: 'City of Winnipeg', find: 'Find your councillor' },
+    'Mississauga': { url: 'https://www.mississauga.ca/council/find-your-councillor/', name: 'City of Mississauga', find: 'Find your councillor' },
+    'Halifax': { url: 'https://www.halifax.ca/council-committees/councillors-find-your-councillor', name: 'Halifax Regional Municipality', find: 'Find your councillor' },
+    'Quebec City': { url: 'https://www.ville.quebec.qc.ca/conseil_municipal/conseillers/index.aspx', name: 'Ville de QuÃ©bec', find: 'Trouvez votre conseiller' },
+    'Hamilton': { url: 'https://www.hamilton.ca/council-committees/councillors/find-your-councillor', name: 'City of Hamilton', find: 'Find your councillor' },
+    'Brampton': { url: 'https://www.brampton.ca/EN/City-Hall/Council/Pages/Welcome.aspx', name: 'City of Brampton', find: 'Find your councillor' },
+    'Surrey': { url: 'https://www.surrey.ca/council/find-your-councillor', name: 'City of Surrey', find: 'Find your councillor' },
+    'Laval': { url: 'https://www.laval.ca/conseil-municipal/conseillers-ville-laval', name: 'Ville de Laval', find: 'Trouvez votre conseiller' },
+    'London': { url: 'https://london.ca/city-council/find-your-councillor', name: 'City of London', find: 'Find your councillor' },
+    'Victoria': { url: 'https://www.victoria.ca/EN/main/government/mayor-council/councillors.html', name: 'City of Victoria', find: 'Find your councillor' },
+    'Regina': { url: 'https://www.regina.ca/council/find-your-councillor/', name: 'City of Regina', find: 'Find your councillor' },
+    'Saskatoon': { url: 'https://www.saskatoon.ca/city-government/mayor-city-councillors', name: 'City of Saskatoon', find: 'Find your councillor' }
+  };
+  
+  // Provincial legislature contact pages
+  const PROVINCIAL_BACKUP_LINKS = {
+    'Ontario': { url: 'https://www.ola.org/en/members', name: 'Ontario Legislative Assembly', find: 'Find your MPP by postal code' },
+    'British Columbia': { url: 'https://www.leg.bc.ca/members', name: 'BC Legislature', find: 'Find your MLA by postal code' },
+    'Quebec': { url: 'https://www.assnat.qc.ca/fr/deputes/index.html', name: 'AssemblÃ©e nationale du QuÃ©bec', find: 'Trouvez votre dÃ©putÃ©' },
+    'Alberta': { url: 'https://www.assembly.ab.ca/members', name: 'Alberta Legislature', find: 'Find your MLA by postal code' },
+    'Manitoba': { url: 'https://www.gov.mb.ca/legislature/members/mla.html', name: 'Manitoba Legislature', find: 'Find your MLA by postal code' },
+    'Saskatchewan': { url: 'https://www.legassembly.sk.ca/mlas/', name: 'Saskatchewan Legislature', find: 'Find your MLA by postal code' },
+    'Nova Scotia': { url: 'https://nslegislature.ca/members/profiles', name: 'Nova Scotia Legislature', find: 'Find your MLA by postal code' },
+    'New Brunswick': { url: 'https://www.legnb.ca/en/members', name: 'New Brunswick Legislature', find: 'Find your MLA by postal code' },
+    'Newfoundland and Labrador': { url: 'https://www.assembly.nl.ca/members', name: 'NL Legislature', find: 'Find your MHA by postal code' },
+    'Prince Edward Island': { url: 'https://www.assembly.pe.ca/members', name: 'PEI Legislature', find: 'Find your MLA by postal code' },
+    'Yukon': { url: 'https://yukonlegislativeassembly.ca/mlas', name: 'Yukon Legislature', find: 'Find your MLA by postal code' },
+    'Northwest Territories': { url: 'https://www.ntassembly.ca/members', name: 'NWT Legislature', find: 'Find your MLA by postal code' },
+    'Nunavut': { url: 'https://www.nuassembly.ca/en/members', name: 'Nunavut Legislature', find: 'Find your MLA by postal code' }
+  };
+  
+  // City to province mapping
+  const CITY_PROVINCE = {
+    'Toronto': 'Ontario', 'Montreal': 'Quebec', 'Vancouver': 'British Columbia', 'Calgary': 'Alberta',
+    'Edmonton': 'Alberta', 'Ottawa': 'Ontario', 'Winnipeg': 'Manitoba', 'Mississauga': 'Ontario',
+    'Halifax': 'Nova Scotia', 'Quebec City': 'Quebec', 'Hamilton': 'Ontario', 'Brampton': 'Ontario',
+    'Surrey': 'British Columbia', 'Laval': 'Quebec', 'London': 'Ontario', 'Markham': 'Ontario',
+    'Vaughan': 'Ontario', 'Gatineau': 'Quebec', 'Saskatoon': 'Saskatchewan', 'Longueuil': 'Quebec',
+    'Kitchener': 'Ontario', 'Burnaby': 'British Columbia', 'Windsor': 'Ontario', 'Regina': 'Saskatchewan',
+    'Richmond': 'British Columbia', 'Burlington': 'Ontario', 'Richmond Hill': 'Ontario', 'Oakville': 'Ontario',
+    'Sherbrooke': 'Quebec', 'Saint John': 'New Brunswick', "St. John's": 'Newfoundland and Labrador', 'Victoria': 'British Columbia',
+    'Fredericton': 'New Brunswick', 'Charlottetown': 'Prince Edward Island', 'Yellowknife': 'Northwest Territories', 'Whitehorse': 'Yukon',
+    'Iqaluit': 'Nunavut', 'Thunder Bay': 'Ontario', 'Sudbury': 'Ontario', 'Sault Ste. Marie': 'Ontario',
+    'North Bay': 'Ontario', 'Trois-RiviÃ¨res': 'Quebec', 'Toronto (Scarborough)': 'Ontario',
+    'Toronto (North York)': 'Ontario', 'Toronto (Etobicoke)': 'Ontario', 'Montreal (Lachine)': 'Quebec',
+    'Montreal (Verdun)': 'Quebec', 'Vancouver (Surrey)': 'British Columbia', 'Vancouver (Burnaby)': 'British Columbia'
+  };
+  
+  // Fetch reps
+  React.useEffect(() => {
+    if (step !== 3) return;
+    
+    // Postal code - full representative lookup
+    if (locType === 'postal' && postalCode) {
+      setLoading(true);
+      const pc = postalCode.replace(/\s/g, '').toUpperCase();
+      fetch(`https://represent.opennorth.ca/postcodes/${pc}/`)
+        .then(r => r.json())
+        .then(d => {
+          const grouped = {federal:[],provincial:[],municipal:[]};
+          const reps = d.representatives_centroid || d.representatives_concordance || [];
+          reps.forEach(r => {
+            const nm = r.name || 'Unknown';
+            const em = r.email || '';
+            const off = r.district_name || '';
+            const party = r.party_name || '';
+            const office = r.elected_office || '';
+            let ph = '';
+            if (r.offices && r.offices.length > 0) {
+              const officeWithPhone = r.offices.find(o => o.tel);
+              if (officeWithPhone) ph = officeWithPhone.tel;
+            }
+            const entry = {name:nm,email:em,phone:ph,office:off,party,officeType:office};
+            if (office === 'MP' || office === 'Senator') {
+              grouped.federal.push(entry);
+            } else if (office === 'MPP' || office === 'MLA' || office === 'MNA' || office === 'MHA') {
+              grouped.provincial.push(entry);
+            } else if (office === 'Mayor' || office === 'Councillor' || office === 'Regional Councillor') {
+              grouped.municipal.push(entry);
+            } else if (r.representative_set_name && r.representative_set_name.includes('House of Commons')) {
+              grouped.federal.push(entry);
+            } else if (r.representative_set_name && (r.representative_set_name.includes('Legislative') || r.representative_set_name.includes('Assembly'))) {
+              grouped.provincial.push(entry);
+            } else if (r.representative_set_name && r.representative_set_name.includes('Council')) {
+              grouped.municipal.push(entry);
+            }
+          });
+          setReps(grouped);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error('API error:', err);
+          setError('postal_code_not_found');
+          setLoading(false);
+        });
+    }
+    // Province or City - fetch provincial and federal reps
+    else if ((locType === 'province' && province) || (locType === 'city' && city)) {
+      setLoading(true);
+      const prov = locType === 'province' ? province : CITY_PROVINCE[city];
+      if (!prov) {
+        setLoading(false);
+        return;
+      }
+      
+      // Fetch federal MPs for this province
+      Promise.all([
+        fetch(`https://represent.opennorth.ca/representatives/house-of-commons/?limit=500`).then(r => r.json()),
+        fetch(`https://represent.opennorth.ca/representatives/?limit=500`).then(r => r.json())
+      ])
+        .then(([federalData, allData]) => {
+          const grouped = {federal:[],provincial:[],municipal:[]};
+          
+          // Filter federal MPs by province
+          const federalReps = (federalData.objects || allData.objects || [])
+            .filter(r => r.elected_office === 'MP' && (r.district_name?.includes(prov) || r.offices?.some(o => o.postal?.startsWith(prov.substring(0,2).toUpperCase()))));
+          
+          // Get province-specific reps
+          const provSet = PROVINCE_REPS[prov];
+          const provincialReps = (allData.objects || [])
+            .filter(r => {
+              const setName = r.representative_set_name || '';
+              const isProvincial = setName.includes('Legislature') || setName.includes('Assembly') || setName.includes('House');
+              const matchesProvince = setName.toLowerCase().includes(prov.toLowerCase().split(' ')[0]);
+              return isProvincial && matchesProvince;
+            });
+          
+          federalReps.slice(0, 10).forEach(r => {
+            grouped.federal.push({
+              name: r.name || 'Unknown',
+              email: r.email || '',
+              phone: r.offices?.[0]?.tel || '',
+              office: r.district_name || r.elected_office || 'MP',
+              party: r.party_name || '',
+              officeType: 'MP'
+            });
+          });
+          
+          provincialReps.slice(0, 10).forEach(r => {
+            grouped.provincial.push({
+              name: r.name || 'Unknown',
+              email: r.email || '',
+              phone: r.offices?.[0]?.tel || '',
+              office: r.district_name || '',
+              party: r.party_name || '',
+              officeType: r.elected_office || 'MLA'
+            });
+          });
+          
+          setReps(grouped);
+          setLoading(false);
+        })
+        .catch(() => {
+          // Fallback: show province name but no specific reps
+          setReps({
+            federal: [{name:`Your Federal MP (${prov})`,email:'',phone:'',office:'Contact Elections Canada',party:'',officeType:'MP'}],
+            provincial: [{name:`Your ${prov} Representative`,email:'',phone:'',office:'Contact your provincial legislature',party:'',officeType:'MLA'}],
+            municipal: []
+          });
+          setLoading(false);
+        });
+    }
+  }, [step, locType, postalCode, province, city]);
+  
+  // Generate email
+  const genEmail = () => {
+    if (!selIssue || !selCat) return '';
+    
+    const catId = selCat.id;
+    const openings = isFrench ? OPENING_LINES_FR : OPENING_LINES;
+    const closings = isFrench ? CLOSING_LINES_FR : CLOSING_LINES;
+    const opening = openings[uTone]?.[catId] || openings.concerned?.[catId] || (isFrench ? "Je vous Ã©cris au sujet d'une question importante." : "I'm writing to you about an important issue.");
+    const closing = closings[uTone] || closings.concerned;
+    
+    // Build the story section
+    const storyPlaceholder = isFrench 
+      ? '[Votre expÃ©rience personnelle rendra votre lettre plus puissante. DÃ©crivez comment cet enjeu vous affecte, vous, votre famille ou votre communautÃ©.]'
+      : '[Your personal experience will make your letter more powerful. Describe how this issue affects you, your family, or your community.]';
+    const story = uDetail ? uDetail : storyPlaceholder;
+    
+    // Build context about the issue
+    const issueName = isFrench && selIssue.nameFr ? selIssue.nameFr : selIssue.name;
+    const issueDetail = isFrench && selIssue.detailFr ? selIssue.detailFr : selIssue.detail;
+    const context = isFrench 
+      ? `L'enjeu est : ${issueName}. ${issueDetail}`
+      : `The issue is: ${issueName}. ${issueDetail}`;
+    
+    // Build signature
+    const namePlaceholder = isFrench ? '[Votre nom]' : '[Your Name]';
+    const locationPlaceholder = isFrench ? '[Votre lieu de rÃ©sidence]' : '[Your Location]';
+    const emailPlaceholder = isFrench ? '[Votre courriel]' : '[Your Email]';
+    const signature = `${uName || namePlaceholder}
+${postalCode || city || province || locationPlaceholder}
+${uEmail || emailPlaceholder}`;
+    
+    // Representative name placeholder
+    const repNamePlaceholder = isFrench ? '[Nom du reprÃ©sentant]' : '[Representative Name]';
+    
+    const tpl = TEMPLATES[catId] || TEMPLATES.infrastructure;
+    const templateBody = isFrench && tpl.bodyFr ? tpl.bodyFr : tpl.body;
+    let body = templateBody
+      .replace(/{{REP_NAME}}/g, repNamePlaceholder)
+      .replace(/{{OPENING}}/g, opening)
+      .replace(/{{STORY}}/g, story)
+      .replace(/{{CONTEXT}}/g, context)
+      .replace(/{{CLOSING}}/g, closing)
+      .replace(/{{SIGNATURE}}/g, signature);
+    
+    return body;
+  };
+  
+  // Copy to clipboard
+  const handleCopy = async () => {
+    const text = genEmail();
+    let success = false;
+    // Try modern clipboard API first
+    try {
+      await navigator.clipboard.writeText(text);
+      success = true;
+    } catch (e) {
+      // Fallback for older browsers or non-HTTPS contexts
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        success = document.execCommand('copy');
+        document.body.removeChild(textarea);
+      } catch (e2) {
+        console.error('Copy failed:', e2);
+      }
+    }
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } else {
+      alert(getText('copyFailed', 'Copy failed. Please select and copy manually.'));
+    }
+  };
+  
+  // Filter issues
+  const filteredIssues = React.useMemo(() => {
+    if (!searchQ) return selCat ? selCat.items : [];
+    const q = searchQ.toLowerCase();
+    return ISSUES.flatMap(c => c.items).filter(i => 
+      i.name.toLowerCase().includes(q) || 
+      (i.nameFr && i.nameFr.toLowerCase().includes(q)) || 
+      i.detail.toLowerCase().includes(q)
+    );
+  }, [searchQ, selCat]);
+  
+  // Render step 1
+  const renderStep1 = () => (
+    <div className="card fade-in">
+      <p style={{color:'#9CA3AF',marginBottom:24,fontSize:15}}>{getText('step1Label','Step 1 of 3: Where do you live?')}</p>
+      <div style={{display:'flex',gap:12,marginBottom:20}} className="flow-row">
+        <button className={`loc-btn ${locType==='postal'?'active':''}`} onClick={()=>{setLocType('postal');setPostalError('');}}>{getText('postalCode','Postal Code')}</button>
+        <button className={`loc-btn ${locType==='city'?'active':''}`} onClick={()=>{setLocType('city');setPostalError('');}}>{getText('city','City')}</button>
+        <button className={`loc-btn ${locType==='province'?'active':''}`} onClick={()=>{setLocType('province');setPostalError('');}}>{getText('province','Province / Territory')}</button>
+      </div>
+      {locType === 'postal' && (
+        <div>
+          <input placeholder="A1A 1A1" value={postalCode} onChange={e=>{
+            const val = e.target.value.toUpperCase();
+            setPostalCode(val);
+            setPostalError(validatePostalCode(val));
+          }} maxLength={7} style={{fontFamily:'monospace',fontSize:18,textTransform:'uppercase'}} />
+          {postalError && <span style={{display:'block',marginTop:8,fontSize:13,color:'#EF4444'}}>âš ï¸ {getText('postalError','Invalid format. Use A1A 1A1 format.')}</span>}
+          {postalCode && !postalError && <span style={{display:'block',marginTop:8,fontSize:13,color:'#10B981'}}>âœ“ {getText('best','BEST')} â€” {getText('detected','Detected:')} {postalCode}</span>}
+          <div style={{marginTop:16,padding:'12px 16px',background:'linear-gradient(135deg,#1e3a5f 0%,#0d1117 100%)',borderRadius:10,border:'1px solid #3b82f6'}}>
+            <p style={{margin:0,fontSize:14,color:'#e5e7eb',lineHeight:1.5}}>ðŸ“ {getText('postalWhy','Your postal code is the most accurate way to find ALL your representatives â€” federal, provincial, AND municipal. City or province only gives you federal and provincial representatives.')}</p>
+          </div>
+        </div>
+      )}
+      {locType === 'city' && (
+        <select value={city} onChange={e=>setCity(e.target.value)}>
+          <option value="">{getText('city','Select city...')}</option>
+          <option>Toronto</option><option>Montreal</option><option>Vancouver</option><option>Calgary</option>
+          <option>Edmonton</option><option>Ottawa</option><option>Winnipeg</option><option>Mississauga</option>
+          <option>Halifax</option><option>Quebec City</option><option>Hamilton</option><option>Brampton</option>
+          <option>Surrey</option><option>Laval</option><option>London</option><option>Markham</option>
+          <option>Vaughan</option><option>Gatineau</option><option>Saskatoon</option><option>Longueuil</option>
+          <option>Kitchener</option><option>Burnaby</option><option>Windsor</option><option>Regina</option>
+          <option>Richmond</option><option>Burlington</option><option>Richmond Hill</option><option>Oakville</option>
+          <option>Sherbrooke</option><option>Saint John</option><option>St. John's</option><option>Victoria</option>
+          <option>Fredericton</option><option>Charlottetown</option><option>Yellowknife</option><option>Whitehorse</option>
+          <option>Iqaluit</option><option>Thunder Bay</option><option>Sudbury</option><option>Sault Ste. Marie</option>
+          <option>North Bay</option><option>Trois-RiviÃ¨res</option><option>Toronto (Scarborough)</option>
+          <option>Toronto (North York)</option><option>Toronto (Etobicoke)</option><option>Montreal (Lachine)</option>
+          <option>Montreal (Verdun)</option><option>Vancouver (Surrey)</option><option>Vancouver (Burnaby)</option>
+        </select>
+      )}
+      {locType === 'province' && (
+        <select value={province} onChange={e=>setProvince(e.target.value)}>
+          <option value="">{getText('province','Select province...')}</option>
+          <option>Ontario</option><option>British Columbia</option><option>Quebec</option><option>Alberta</option>
+          <option>Manitoba</option><option>Saskatchewan</option><option>Nova Scotia</option><option>New Brunswick</option>
+          <option>Newfoundland and Labrador</option><option>Prince Edward Island</option>
+          <option>Yukon</option><option>Northwest Territories</option><option>Nunavut</option>
+        </select>
+      )}
+      {locType !== 'postal' && <p style={{color:'#F59E0B',fontSize:13,marginTop:12}}>{getText('noPostalWarning','Provincial and federal representatives will be shown. For municipal reps, enter a postal code.')}</p>}
+      <button className="btn-primary" style={{marginTop:28}} onClick={()=>setStep(2)} disabled={!(postalCode||city||province)||postalError}>{getText('getStarted','Get Started')} â†’</button>
+    </div>
+  );
+  
+  // Render step 2
+  const renderStep2 = () => (
+    <div className="card fade-in">
+      <p style={{color:'#9CA3AF',marginBottom:20,fontSize:15}}>{getText('step2Label','Step 2 of 3: What is your issue?')}</p>
+      <input placeholder={getText('searchPlaceholder','Search issues...')} value={searchQ} onChange={e=>setSearchQ(e.target.value)} style={{marginBottom:20}} />
+      {!selCat && !searchQ && (
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:12}}>
+          {ISSUES.map(cat => (
+            <button key={cat.id} className="cat-btn" onClick={()=>setSelCat(cat)}>
+              <span style={{fontSize:24,marginRight:10}}>{cat.icon}</span>
+              <div style={{textAlign:'left'}}>
+                <div>{isFrench ? (FR.categories[cat.id] || cat.label) : cat.label}</div>
+                <div style={{color:'#9CA3AF',fontSize:12,marginTop:4}}>{cat.items.length} {getText('issues','issues')}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+      {(selCat || searchQ) && (
+        <div>
+          {!searchQ && <button className="btn-secondary" style={{marginBottom:16}} onClick={()=>{setSelCat(null);setSelIssue(null);}}>{getText('allCategoriesBtn','â† All categories')}</button>}
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            {(searchQ ? filteredIssues : selCat.items).map((issue,i) => (
+              <button key={i} className="issue-btn" onClick={()=>{setSelIssue(issue);setStep(3);}}>
+                <div style={{textAlign:'left'}}>
+                  <div style={{fontWeight:600}}>{isFrench && issue.nameFr ? issue.nameFr : issue.name}</div>
+                  <div style={{fontSize:12,color:'#9CA3AF',marginTop:4,lineHeight:1.5}}>{issue.detail}</div>
+                </div>
+                <span style={{color:'#EF4444'}}>â†’</span>
+              </button>
+            ))}
+          </div>
+          {!filteredIssues.length && searchQ && <p style={{color:'#9CA3AF'}}>{getText('noIssuesFound','No issues found.')}</p>}
+        </div>
+      )}
+      <button className="btn-secondary" style={{marginTop:20}} onClick={()=>setStep(1)}>{getText('back','â† Back')}</button>
+    </div>
+  );
+  
+  // Render step 3
+  const renderStep3 = () => {
+    const email = genEmail();
+    const tpl = TEMPLATES[selCat?.id] || TEMPLATES.infrastructure;
+    
+    return (
+      <div className="card fade-in">
+        <p style={{color:'#9CA3AF',marginBottom:20,fontSize:15}}>{getText('step3Label',"Step 3 of 3: Here's who can help")}</p>
+        
+        {/* Issue info */}
+        {selIssue && (
+          <div style={{background:'rgba(255,255,255,0.03)',borderRadius:12,padding:16,marginBottom:20}}>
+            <h3 style={{margin:'0 0 8px 0',fontSize:18}}>{isFrench && selIssue.nameFr ? selIssue.nameFr : selIssue.name}</h3>
+            <p style={{margin:0,color:'#9CA3AF',fontSize:14}}>{selIssue.detail}</p>
+            <div style={{marginTop:12,display:'flex',gap:8,flexWrap:'wrap'}}>
+              <span className="badge" style={{background:selIssue.primary==='federal'?'#1E40AF':selIssue.primary==='provincial'?'#047857':'#B91C1C'}}>
+                {selIssue.primary.charAt(0).toUpperCase() + selIssue.primary.slice(1)} {getText('primary','Primary')}
+              </span>
+              {selIssue.secondary.map(s => (
+                <span key={s} className="badge" style={{background:s==='federal'?'#1E40AF':s==='provincial'?'#047857':'#B91C1C'}}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Primary contact indicator */}
+        {selIssue && (
+          <div style={{background:'linear-gradient(135deg, rgba(217,119,6,0.15) 0%, rgba(220,38,38,0.1) 100%)',border:'1px solid rgba(217,119,6,0.3)',borderRadius:12,padding:16,marginBottom:20}}>
+            <div style={{display:'flex',flexWrap:'wrap',gap:12,alignItems:'center'}}>
+              <div>
+                <span style={{color:'#FBBF24',fontWeight:600,marginRight:8}}>{getText('primaryLabel','Primary:')}</span>
+                <span style={{color:'#fff',fontWeight:500}}>{selIssue.primary.charAt(0).toUpperCase() + selIssue.primary.slice(1)}</span>
+              </div>
+              {selIssue.secondary.length > 0 && (
+                <div>
+                  <span style={{color:'#9CA3AF',marginRight:8}}>{getText('alsoInvolvedLabel','Also involved:')}</span>
+                  <span style={{color:'#fff'}}>{selIssue.secondary.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(', ')}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Representatives */}
+        {loading ? (
+          <div style={{textAlign:'center',padding:40}}>
+            <div className="spinner" />
+            <p style={{color:'#9CA3AF',marginTop:16,fontSize:14}}>{isFrench ? (FR.loadingReps || 'Chargement de vos reprÃ©sentants...') : 'Loading your representatives...'}</p>
+          </div>
+        ) : error ? (
+          <div style={{textAlign:'center',padding:40}}>
+            <div style={{fontSize:48,marginBottom:16}}>âš ï¸</div>
+            <h3 style={{margin:'0 0 8px 0',color:'#F87171'}}>{isFrench ? (FR.errorFetching || 'Error fetching representatives') : 'Error fetching representatives'}</h3>
+            <p style={{color:'#9CA3AF',marginBottom:20}}>{isFrench ? (FR.errorTryAgain || 'Please try again or use the alternative links below.') : 'Please try again or use the alternative links below.'}</p>
+            <button className="btn-secondary" onClick={()=>{setError('');setStep(1);}} style={{marginBottom:20}}>{isFrench ? 'RÃ©essayer' : 'Try Again'}</button>
+          </div>
+        ) : (
+          <div style={{marginBottom:20}}>
+            {reps.federal.length > 0 && (
+              <div style={{marginBottom:16}}>
+                <h4 style={{margin:'0 0 8px 0',color:'#3B82F6'}}>ðŸ›ï¸ {isFrench ? getText('federalHeader', 'Federal') : 'Federal'}</h4>
+                {selCat && (isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id]?.federal && (
+                  <div style={{background:'linear-gradient(135deg, #1e3a5f 0%, #0d1117 100%)',border:'1px solid #3b82f6',borderRadius:12,padding:'16px 20px',marginBottom:16,boxShadow:'0 4px 20px rgba(59,130,246,0.15)'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                      <span style={{fontSize:24}}>ðŸ›ï¸</span>
+                      <div style={{fontWeight:700,fontSize:16,color:'#60A5FA'}}>{(isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id].federal.title}</div>
+                    </div>
+                    <div style={{fontSize:13,color:'#9CA3AF',lineHeight:1.7,borderLeft:'3px solid #3b82f6',paddingLeft:12}}>
+                      {(isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id].federal.items.join(' â€¢ ')}
+                    </div>
+                    <div style={{marginTop:10,fontSize:12,color:'#60A5FA',fontWeight:500}}>âœ‰ï¸ {isFrench ? getText('contactYourMP', 'Contact your') + ' ' + (isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id].federal.contact : 'Contact your ' + JURISDICTION_HEADERS[selCat.id].federal.contact}</div>
+                  </div>
+                )}
+                {reps.federal.map((r,i) => (
+                  <div key={i} className="rep-card" style={{marginBottom:8,background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:10,padding:'14px 16px'}}>
+                    <div style={{fontWeight:600,fontSize:15}}>{r.name}</div>
+                    <div style={{fontSize:12,color:'#6B7280',marginTop:2}}>
+                      <span>{getText('riding','Riding:')} {r.office}</span>
+                      {r.party && <span style={{marginLeft:8}}>â€¢ {getText('party','Party:')} {r.party}</span>}
+                    </div>
+                    {r.email && <div style={{fontSize:13,marginTop:8,color:'#9CA3AF'}}>âœ‰ï¸ {getText('email','Email:')} {r.email}</div>}
+                    {r.phone && <div style={{fontSize:13,color:'#9CA3AF'}}>ðŸ“ž {getText('phone','Phone:')} {r.phone}</div>}
+                    {r.website && <div style={{fontSize:13,color:'#9CA3AF'}}>ðŸŒ {getText('website','Website:')} {r.website}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+            {reps.provincial.length > 0 && (
+              <div style={{marginBottom:16}}>
+                <h4 style={{margin:'0 0 8px 0',color:'#10B981'}}>ðŸ›ï¸ {isFrench ? getText('provincialHeader', 'Provincial') : 'Provincial'}</h4>
+                {selCat && (isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id]?.provincial && (
+                  <div style={{background:'linear-gradient(135deg, #064e3b 0%, #0d1117 100%)',border:'1px solid #10b981',borderRadius:12,padding:'16px 20px',marginBottom:16,boxShadow:'0 4px 20px rgba(16,185,129,0.15)'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                      <span style={{fontSize:24}}>ðŸ›ï¸</span>
+                      <div style={{fontWeight:700,fontSize:16,color:'#34D399'}}>{(isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id].provincial.title}</div>
+                    </div>
+                    <div style={{fontSize:13,color:'#9CA3AF',lineHeight:1.7,borderLeft:'3px solid #10b981',paddingLeft:12}}>
+                      {(isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id].provincial.items.join(' â€¢ ')}
+                    </div>
+                    <div style={{marginTop:10,fontSize:12,color:'#34D399',fontWeight:500}}>âœ‰ï¸ {isFrench ? getText('contactYourMPP', 'Contact your') + ' ' + (isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id].provincial.contact : 'Contact your ' + JURISDICTION_HEADERS[selCat.id].provincial.contact}</div>
+                  </div>
+                )}
+                {reps.provincial.map((r,i) => (
+                  <div key={i} className="rep-card" style={{marginBottom:8,background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:10,padding:'14px 16px'}}>
+                    <div style={{fontWeight:600,fontSize:15}}>{r.name}</div>
+                    <div style={{fontSize:12,color:'#6B7280',marginTop:2}}>
+                      <span>{getText('riding','Riding:')} {r.office}</span>
+                      {r.party && <span style={{marginLeft:8}}>â€¢ {getText('party','Party:')} {r.party}</span>}
+                    </div>
+                    {r.email && <div style={{fontSize:13,marginTop:8,color:'#9CA3AF'}}>âœ‰ï¸ {getText('email','Email:')} {r.email}</div>}
+                    {r.phone && <div style={{fontSize:13,color:'#9CA3AF'}}>ðŸ“ž {getText('phone','Phone:')} {r.phone}</div>}
+                    {r.website && <div style={{fontSize:13,color:'#9CA3AF'}}>ðŸŒ {getText('website','Website:')} {r.website}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+            {reps.municipal.length > 0 && (
+              <div>
+                <h4 style={{margin:'0 0 8px 0',color:'#EF4444'}}>ðŸ›ï¸ {isFrench ? getText('municipalHeader', 'Municipal') : 'Municipal'}</h4>
+                {selCat && (isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id]?.municipal && (
+                  <div style={{background:'linear-gradient(135deg, #4a1d1d 0%, #0d1117 100%)',border:'1px solid #ef4444',borderRadius:12,padding:'16px 20px',marginBottom:16,boxShadow:'0 4px 20px rgba(239,68,68,0.15)'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                      <span style={{fontSize:24}}>ðŸ›ï¸</span>
+                      <div style={{fontWeight:700,fontSize:16,color:'#F87171'}}>{(isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id].municipal.title}</div>
+                    </div>
+                    <div style={{fontSize:13,color:'#9CA3AF',lineHeight:1.7,borderLeft:'3px solid #ef4444',paddingLeft:12}}>
+                      {(isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id].municipal.items.join(' â€¢ ')}
+                    </div>
+                    <div style={{marginTop:10,fontSize:12,color:'#F87171',fontWeight:500}}>âœ‰ï¸ {isFrench ? getText('contactYourCouncillor', 'Contact your') + ' ' + (isFrench ? JURISDICTION_HEADERS_FR : JURISDICTION_HEADERS)[selCat.id].municipal.contact : 'Contact your ' + JURISDICTION_HEADERS[selCat.id].municipal.contact}</div>
+                  </div>
+                )}
+                {reps.municipal.map((r,i) => (
+                  <div key={i} className="rep-card" style={{marginBottom:8,background:'rgba(255,255,255,0.02)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:10,padding:'14px 16px'}}>
+                    <div style={{fontWeight:600,fontSize:15}}>{r.name}</div>
+                    <div style={{fontSize:12,color:'#6B7280',marginTop:2}}>{r.office}</div>
+                    {r.email && <div style={{fontSize:13,marginTop:8,color:'#9CA3AF'}}>âœ‰ï¸ {getText('email','Email:')} {r.email}</div>}
+                    {r.phone && <div style={{fontSize:13,color:'#9CA3AF'}}>ðŸ“ž {getText('phone','Phone:')} {r.phone}</div>}
+                    {r.website && <div style={{fontSize:13,color:'#9CA3AF'}}>ðŸŒ {getText('website','Website:')} {r.website}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+            {!reps.federal.length && !reps.provincial.length && !reps.municipal.length && (
+              <p style={{color:'#9CA3AF'}}>{getText('enterLocationPrompt','Enter a postal code to see your representatives.')}</p>
+            )}
+            
+            {/* Backup lookup links when reps not found */}
+            {(reps.federal.length === 0 || reps.provincial.length === 0 || reps.municipal.length === 0) && (postalCode || city || province) && (
+              <div style={{marginTop:20,padding:'16px',background:'rgba(59,130,246,0.08)',border:'1px solid rgba(59,130,246,0.2)',borderRadius:12}}>
+                <h4 style={{margin:'0 0 12px 0',color:'#60A5FA',fontSize:15}}>ðŸ”— {getText('backupResources','Additional Resources')}</h4>
+                <p style={{color:'#9CA3AF',fontSize:13,marginBottom:12}}>{getText('backupPrompt','If you cannot find your representative, use these official links:')}</p>
+                
+                {reps.federal.length === 0 && (
+                  <div style={{marginBottom:12}}>
+                    <a href="https://www.ourcommons.ca/Members/en/search" target="_blank" rel="noopener noreferrer" style={{color:'#FBBF24',textDecoration:'none',fontWeight:600}}>ðŸ›ï¸ {getText('findFederalMP','Find your Federal MP')} â†—</a>
+                    <span style={{color:'#6B7280',fontSize:12,marginLeft:8}}>({getText('electionsCanada','Elections Canada')})</span>
+                  </div>
+                )}
+                
+                {reps.provincial.length === 0 && province && PROVINCIAL_BACKUP_LINKS[province] && (
+                  <div style={{marginBottom:12}}>
+                    <a href={PROVINCIAL_BACKUP_LINKS[province].url} target="_blank" rel="noopener noreferrer" style={{color:'#34D399',textDecoration:'none',fontWeight:600}}>ðŸ›ï¸ {PROVINCIAL_BACKUP_LINKS[province].name} â†—</a>
+                    <span style={{color:'#6B7280',fontSize:12,marginLeft:8}}>{PROVINCIAL_BACKUP_LINKS[province].find}</span>
+                  </div>
+                )}
+                
+                {reps.municipal.length === 0 && city && MUNICIPAL_BACKUP_LINKS[city] && (
+                  <div style={{marginBottom:12}}>
+                    <a href={MUNICIPAL_BACKUP_LINKS[city].url} target="_blank" rel="noopener noreferrer" style={{color:'#F87171',textDecoration:'none',fontWeight:600}}>ðŸ›ï¸ {MUNICIPAL_BACKUP_LINKS[city].name} â†—</a>
+                    <span style={{color:'#6B7280',fontSize:12,marginLeft:8}}>{MUNICIPAL_BACKUP_LINKS[city].find}</span>
+                  </div>
+                )}
+                
+                {reps.municipal.length === 0 && !MUNICIPAL_BACKUP_LINKS[city] && (
+                  <div style={{marginBottom:12}}>
+                    <span style={{color:'#F87171',fontWeight:600}}>ðŸ›ï¸ {getText('findMunicipalRep','Municipal Councillor')}</span>
+                    <p style={{color:'#6B7280',fontSize:12,margin:'4px 0 0 0'}}>{getText('municipalSearchPrompt','Search for "[your city] councillor" to find your local representative.')}</p>
+                  </div>
+                )}
+              </div>
+            )}
+            {(reps.federal.length > 0 || reps.provincial.length > 0 || reps.municipal.length > 0) && (
+              <p style={{color:'#6B7280',fontSize:11,marginTop:12,lineHeight:1.5}}>
+                {isFrench ? getText('repDataNote', 'Representative data from OpenNorth API. Federal & provincial data is current. Municipal data may occasionally be outdated after elections.') : 'Representative data from OpenNorth API. Federal & provincial data is current. Municipal data may occasionally be outdated after elections.'}
+              </p>
+            )}
+          </div>
+        )}
+        
+        {/* Email template */}
+        <h3 style={{margin:'20px 0 12px 0'}}>{getText('draftYourMessage','Draft Your Message')}</h3>
+        
+        {/* Tone selector */}
+        <div style={{marginBottom:16}}>
+          <label style={{display:'block',marginBottom:8,fontSize:14,fontWeight:500,color:'#9CA3AF'}}>{getText('toneLabel','How are you feeling about this?')}</label>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            <button onClick={()=>setUTone('urgent')} style={{padding:'10px 16px',borderRadius:20,border:uTone==='urgent'?'2px solid #EF4444':'2px solid transparent',background:uTone==='urgent'?'rgba(239,68,68,0.15)':'rgba(255,255,255,0.05)',color:uTone==='urgent'?'#F87171':'#9CA3AF',cursor:'pointer',transition:'all 0.15s'}}>ðŸš¨ {isFrench ? FR.toneUrgent : 'Urgent'}</button>
+            <button onClick={()=>setUTone('concerned')} style={{padding:'10px 16px',borderRadius:20,border:uTone==='concerned'?'2px solid #3B82F6':'2px solid transparent',background:uTone==='concerned'?'rgba(59,130,246,0.15)':'rgba(255,255,255,0.05)',color:uTone==='concerned'?'#60A5FA':'#9CA3AF',cursor:'pointer',transition:'all 0.15s'}}>ðŸ˜Ÿ {isFrench ? FR.toneConcerned : 'Concerned'}</button>
+            <button onClick={()=>setUTone('hopeful')} style={{padding:'10px 16px',borderRadius:20,border:uTone==='hopeful'?'2px solid #10B981':'2px solid transparent',background:uTone==='hopeful'?'rgba(16,185,129,0.15)':'rgba(255,255,255,0.05)',color:uTone==='hopeful'?'#34D399':'#9CA3AF',cursor:'pointer',transition:'all 0.15s'}}>ðŸŒŸ {isFrench ? FR.toneHopeful : 'Hopeful'}</button>
+            <button onClick={()=>setUTone('frustrated')} style={{padding:'10px 16px',borderRadius:20,border:uTone==='frustrated'?'2px solid #F59E0B':'2px solid transparent',background:uTone==='frustrated'?'rgba(245,158,11,0.15)':'rgba(255,255,255,0.05)',color:uTone==='frustrated'?'#FBBF24':'#9CA3AF',cursor:'pointer',transition:'all 0.15s'}}>ðŸ˜¤ {isFrench ? FR.toneFrustrated : 'Frustrated'}</button>
+          </div>
+        </div>
+        
+        {/* Story prompts */}
+        {selCat && STORY_PROMPTS[selCat.id] && (
+          <div style={{background:'rgba(245,158,11,0.08)',border:'1px solid rgba(245,158,11,0.2)',borderRadius:12,padding:16,marginBottom:16}}>
+            <div style={{fontWeight:600,color:'#FBBF24',marginBottom:8,fontSize:14}}>ðŸ’¡ {getText('tipsHeader','Tips for a powerful letter:')}</div>
+            <div style={{fontSize:13,color:'#9CA3AF',lineHeight:1.7}}>
+              {((isFrench && STORY_PROMPTS_FR && STORY_PROMPTS_FR[selCat.id]) ? STORY_PROMPTS_FR[selCat.id] : STORY_PROMPTS[selCat.id]).map((prompt, i) => {
+                const prompts = isFrench && STORY_PROMPTS_FR && STORY_PROMPTS_FR[selCat.id] ? STORY_PROMPTS_FR[selCat.id] : STORY_PROMPTS[selCat.id];
+                return <div key={i} style={{marginBottom:i < prompts.length - 1 ? 6 : 0}}>â€¢ {prompt}</div>;
+              })}
+            </div>
+          </div>
+        )}
+        
+        <div style={{marginBottom:16}}>
+          <input placeholder={getText('yourFullName','Your full name')} value={uName} onChange={e=>setUName(e.target.value)} />
+        </div>
+        <div style={{marginBottom:16}}>
+          <input type="email" placeholder={getText('yourEmail','Your email')} value={uEmail} onChange={e=>setUEmail(e.target.value)} />
+        </div>
+        <div style={{marginBottom:16}}>
+          <input placeholder={getText('yourPhone','Your phone (optional)')} value={uPhone} onChange={e=>setUPhone(e.target.value)} />
+        </div>
+        <div style={{marginBottom:16}}>
+          <textarea placeholder={getText('experiencePlaceholder','Describe how this issue affects you personally...')} value={uDetail} onChange={e=>setUDetail(e.target.value)} style={{minHeight:120}} />
+        </div>
+        
+        {/* Generated email */}
+        <div style={{background:'rgba(0,0,0,0.3)',borderRadius:12,padding:16,fontFamily:'monospace',fontSize:13,whiteSpace:'pre-wrap',marginBottom:16}}>{email}</div>
+        
+        {/* Actions */}
+        <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:12}}>
+          <button className="btn-primary" onClick={handleCopy}>{copied ? getText('copied','Copied!') : getText('copyToClipboard','Copy to Clipboard')}</button>
+          <button className="btn-secondary" onClick={()=>setShowDraftPrompt(true)}>{getText('saveDraft','Save Draft')}</button>
+        </div>
+        <p style={{color:'#9CA3AF',fontSize:13,marginBottom:20}}>{getText('tip','Tip: Personalize the highlighted sections for maximum impact.')}</p>
+        
+        <button className="btn-secondary" onClick={()=>setStep(2)}>{getText('back','â† Back')}</button>
+        <button className="btn-secondary" style={{marginLeft:8}} onClick={()=>{setStep(2);setSelIssue(null);}}>{getText('differentIssue','Different Issue')}</button>
+        <button className="btn-secondary" style={{marginLeft:8}} onClick={()=>{setStep(1);setPostalCode('');setCity('');setProvince('');setSelCat(null);setSelIssue(null);clearDraft();setPostalError('');}}>{getText('startOver','Start Over')}</button>
+      </div>
+    );
+  };
+  
+  return (
+    <div>
+      {/* Draft prompt */}
+      {showDraftPrompt && <DraftPrompt onRestore={handleRestoreDraft} onDismiss={()=>setShowDraftPrompt(false)} isFrench={isFrench} />}
+      
+      {/* Header */}
+      <header style={{textAlign:'center',marginBottom:32,position:'relative'}}>
+        {/* Share button - top right */}
+        <div ref={shareRef} style={{position:'absolute',top:0,right:0,zIndex:10}}>
+          <button 
+            onClick={()=>setShowShare(!showShare)}
+            style={{
+              background:'rgba(255,255,255,0.05)',
+              border:'1px solid rgba(255,255,255,0.1)',
+              borderRadius:8,
+              padding:'8px 12px',
+              color:'#9CA3AF',
+              fontSize:13,
+              fontWeight:500,
+              cursor:'pointer',
+              display:'flex',
+              alignItems:'center',
+              gap:6,
+              transition:'all 0.15s'
+            }}
+            onMouseOver={e=>{e.currentTarget.style.background='rgba(255,255,255,0.1)';e.currentTarget.style.color='#fff'}}
+            onMouseOut={e=>{e.currentTarget.style.background='rgba(255,255,255,0.05)';e.currentTarget.style.color='#9CA3AF'}}
+          >
+            <span>ðŸ“¤</span>
+            <span>{getText('shareBtn','Share')}</span>
+          </button>
+          {showShare && (
+            <div style={{
+              position:'absolute',
+              top:'100%',
+              right:0,
+              marginTop:8,
+              background:'#1A1A2E',
+              border:'1px solid rgba(255,255,255,0.1)',
+              borderRadius:12,
+              padding:12,
+              minWidth:200,
+              boxShadow:'0 10px 40px rgba(0,0,0,0.5)'
+            }}>
+              <p style={{color:'#6B7280',fontSize:12,margin:'0 0 10px 0'}}>{getText('sharePrompt','Share this tool with friends and family')}</p>
+              <button onClick={()=>{navigator.clipboard?.writeText(window.location.href).then(()=>alert(getText('linkCopied','Link copied!'))).catch(()=>{const ta=document.createElement('textarea');ta.value=window.location.href;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert(getText('linkCopied','Link copied!'));});setShowShare(false);}} style={{width:'100%',padding:'10px 14px',marginBottom:8,background:'linear-gradient(135deg,#3B82F6,#1D4ED8)',border:'none',borderRadius:8,color:'#fff',fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
+                <span>ðŸ”—</span> {getText('shareCopyLink','Copy Link')}
+              </button>
+              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(getText('shareText','Check out My Civic Voice â€” find your representatives and make your voice heard!'))}&url=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" style={{width:'100%',padding:'10px 14px',marginBottom:8,background:'#1DA1F2',border:'none',borderRadius:8,color:'#fff',fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,textDecoration:'none'}}>
+                <span>ðŸ¦</span> Twitter
+              </a>
+              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`} target="_blank" rel="noopener noreferrer" style={{width:'100%',padding:'10px 14px',marginBottom:8,background:'#1877F2',border:'none',borderRadius:8,color:'#fff',fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,textDecoration:'none'}}>
+                <span>ðŸ“˜</span> Facebook
+              </a>
+              <a href={`mailto:?subject=${encodeURIComponent(getText('shareSubject','My Civic Voice Canada'))}&body=${encodeURIComponent(getText('shareText','Check out My Civic Voice â€” find your representatives and make your voice heard!') + '\n\n' + window.location.href)}`} style={{width:'100%',padding:'10px 14px',marginBottom:8,background:'#10B981',border:'none',borderRadius:8,color:'#fff',fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,textDecoration:'none'}}>
+                <span>âœ‰ï¸</span> {getText('shareEmail','Email')}
+              </a>
+              <a href={`https://wa.me/?text=${encodeURIComponent(getText('shareText','Check out My Civic Voice â€” find your representatives and make your voice heard!') + ' ' + window.location.href)}`} target="_blank" rel="noopener noreferrer" style={{width:'100%',padding:'10px 14px',background:'#25D366',border:'none',borderRadius:8,color:'#fff',fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,textDecoration:'none'}}>
+                <span>ðŸ’¬</span> WhatsApp
+              </a>
+            </div>
+          )}
+        </div>
+        
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:12}}>
+          <h1 style={{fontFamily:'"Playfair Display",serif',fontSize:36,margin:0,background:'linear-gradient(135deg,#F59E0B,#EF4444)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>
+            {getText('siteTitle','My Civic Voice')}
+          </h1>
+          <LanguageToggle isFrench={isFrench} onToggle={handleLangToggle} />
+        </div>
+        <div style={{fontSize:28,fontWeight:700,color:'#9CA3AF',marginTop:4}}>{getText('siteSubtitle','Canada')}</div>
+        <p style={{color:'#9CA3AF',maxWidth:480,margin:'16px auto 0',lineHeight:1.6}}>{getText('tagline','No accounts. No tracking. Just your voice.')}</p>
+        <div style={{marginTop:20,padding:'14px 18px',background:'linear-gradient(135deg,rgba(16,185,129,0.1) 0%,rgba(6,78,59,0.2) 100%)',border:'1px solid rgba(16,185,129,0.25)',borderRadius:12,maxWidth:520,margin:'20px auto 0'}}>
+          <p style={{margin:0,fontSize:14,color:'#A7F3D0',lineHeight:1.6}}>
+            ðŸ’¡ <strong style={{color:'#34D399'}}>{isFrench ? 'Pourquoi Ã§a compte :' : 'Why it matters:'}</strong> {isFrench ? 'Les reprÃ©sentants Ã©lus accordent la prioritÃ© aux messages venant de leur propre circonscription. Votre code postal prouve que vous Ãªtes leur Ã©lecteur â€” ce qui donne plus de poids Ã  votre voix.' : 'Elected representatives prioritize messages from their own constituency. Your postal code proves you\'re their constituent â€” giving your voice more weight.'}
+          </p>
+        </div>
+      </header>
+      
+      {/* Top navigation buttons */}
+      {step === 2 && (
+        <div style={{marginBottom:16,display:'flex',gap:8,flexWrap:'wrap'}}>
+          <button className="btn-secondary" onClick={()=>setStep(1)}>{getText('back','â† Back')}</button>
+        </div>
+      )}
+      {step === 3 && (
+        <div style={{marginBottom:16,display:'flex',gap:8,flexWrap:'wrap'}}>
+          <button className="btn-secondary" onClick={()=>setStep(2)}>{getText('back','â† Back')}</button>
+          <button className="btn-secondary" onClick={()=>{setStep(2);setSelIssue(null);}}>{getText('differentIssue','Different Issue')}</button>
+          <button className="btn-secondary" onClick={()=>{setStep(1);setPostalCode('');setCity('');setProvince('');setSelCat(null);setSelIssue(null);clearDraft();setPostalError('');}}>{getText('startOver','Start Over')}</button>
+        </div>
+      )}
+      
+      {/* Main content */}
+      {step === 1 && renderStep1()}
+      {step === 2 && renderStep2()}
+      {step === 3 && renderStep3()}
+      
+      {/* Footer */}
+      <footer style={{textAlign:'center',marginTop:40,paddingTop:20,borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+        <div style={{marginBottom:12}}>
+          <button className="footer-btn" onClick={()=>setShowFAQ(true)}>{getText('helpFAQ','Help / FAQ')}</button>
+          <button className="footer-btn" onClick={()=>setShowPrivacy(true)}>{getText('privacyTitle','Privacy')}</button>
+          <button className="footer-btn" onClick={()=>setShowAbout(true)}>{getText('aboutTitle','About')}</button>
+          <button className="footer-btn" onClick={()=>setShowTerms(true)}>{isFrench ? 'Conditions' : 'Terms'}</button>
+          <button className="footer-btn" onClick={()=>setShowFeedback(true)}>{getText('sendFeedback','Send Feedback')}</button>
+        </div>
+        <p style={{color:'#6B7280',fontSize:13}}>{getText('footerText','Built for Canadians who want to be heard.')}</p>
+        <p style={{color:'#4B5563',fontSize:11,marginTop:8}}>
+          {isFrench ? 'DonnÃ©es des reprÃ©sentants : API Represent d\'OpenNorth' : 'Representative data: OpenNorth Represent API'} 
+          <span style={{margin:'0 8px'}}>â€¢</span>
+          <a href="https://opennorth.ca/" target="_blank" rel="noopener noreferrer" style={{color:'#6B7280',textDecoration:'none'}}>OpenNorth.ca</a>
+        </p>
+        <p style={{color:'#6B7280',fontSize:12,marginTop:8}}>
+          {isFrench ? 'CrÃ©Ã© par Pam et Daniel chez LighthouseAI' : 'Made by Pam & Daniel at LighthouseAI'}
+        </p>
+      </footer>
+      
+      {/* Modals */}
+      <FAQModal isOpen={showFAQ} onClose={()=>setShowFAQ(false)} isFrench={isFrench} />
+      <FeedbackModal isOpen={showFeedback} onClose={()=>setShowFeedback(false)} isFrench={isFrench} />
+      <PrivacyModal isOpen={showPrivacy} onClose={()=>setShowPrivacy(false)} isFrench={isFrench} />
+      <AboutModal isOpen={showAbout} onClose={()=>setShowAbout(false)} isFrench={isFrench} />
+      <TermsModal isOpen={showTerms} onClose={()=>setShowTerms(false)} isFrench={isFrench} />
+    </div>
+  );
+}
+
+// Render
+ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+</script>
+</body>
+</html>

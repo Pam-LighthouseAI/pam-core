@@ -76,6 +76,10 @@
 ║     Customize achievement board with real achievements
 ║     Fulfilled on: Mar 3, 2026
 ║
+║  ✓ 🏛️ Civic Builder
+║     Build a civic engagement tool for Canadian citizens
+║     Fulfilled on: Mar 6, 2026
+║
 ╠══════════════ FORSAKEN QUESTS ══════════════╣
 ║
 ║  💀 📷 PhotoBackupApp

@@ -1,0 +1,54 @@
+renderStep1 = () => (
+    <div className="card fade-in">
+      <p style={{color:'#888',marginBottom:24,fontSize:15}}>{getText('step1Label','Step 1 of 3: Where do you live?')}</p>
+      <div style={{display:'flex',gap:12,marginBottom:20}} className="flow-row">
+        <button className={`loc-btn ${locType==='postal'?'active':''}`} onClick={()=>{setLocType('postal');setPostalError('');}}>{getText('postalCode','Postal Code')}</button>
+        <button className={`loc-btn ${locType==='city'?'active':''}`} onClick={()=>{setLocType('city');setPostalError('');}}>{getText('city','City')}</button>
+        <button className={`loc-btn ${locType==='province'?'active':''}`} onClick={()=>{setLocType('province');setPostalError('');}}>{getText('province','Province / Territory')}</button>
+      </div>
+      {locType === 'postal' && (
+        <div>
+          <input placeholder="A1A 1A1" value={postalCode} onChange={e=>{
+            const val = e.target.value.toUpperCase();
+            setPostalCode(val);
+            setPostalError(validatePostalCode(val));
+          }} maxLength={7} style={{fontFamily:'monospace',fontSize:18,textTransform:'uppercase'}} />
+          {postalCode && postalError === 'invalid' && <span style={{display:'block',marginTop:8,fontSize:13,color:'#EF4444'}}> {getText('invalid','Invalid')}</span>}
+          {postalCode && postalError === 'typing' && <span style={{display:'block',marginTop:8,fontSize:13,color:'#888'}}> {getText('lookingUp','Looking up...')}</span>}
+          {postalCode && !postalError && !prefetchedReps && <span style={{display:'block',marginTop:8,fontSize:13,color:'#10B981'}}> {getText('valid','Valid')}</span>}
+          {postalCode && !postalError && prefetching && <span style={{display:'block',marginTop:8,fontSize:13,color:'#B91C1C'}}> {isFrench ? 'Chargement des représentants...' : 'Loading representatives...'}</span>}
+          {postalCode && !postalError && prefetchedReps && !prefetching && <span style={{display:'block',marginTop:8,fontSize:13,color:'#10B981'}}> {getText('valid','Valid')}  {isFrench ? 'Représentants trouvés!' : 'Representatives found!'}</span>}
+          <div style={{marginTop:16,padding:'12px 16px',background:'linear-gradient(135deg,rgba(47,164,169,0.06),rgba(31,58,95,0.04))',borderRadius:10,border:'1px solid rgba(47,164,169,0.2)'}}>
+            <p style={{margin:0,fontSize:14,color:'var(--charcoal)',lineHeight:1.6}}> {getText('postalWhy','Your postal code is the most accurate way to find ALL your representatives — federal, provincial, AND municipal. City or province only gives you federal and provincial representatives.')}</p>
+          </div>
+        </div>
+      )}
+      {locType === 'city' && (
+        <select value={city} onChange={e=>setCity(e.target.value)}>
+          <option value="">{getText('city','Select city...')}</option>
+          <option>Toronto</option><option>Montreal</option><option>Vancouver</option><option>Calgary</option>
+          <option>Edmonton</option><option>Ottawa</option><option>Winnipeg</option><option>Mississauga</option>
+          <option>Halifax</option><option>Quebec City</option><option>Hamilton</option><option>Brampton</option>
+          <option>Surrey</option><option>Laval</option><option>London</option><option>Markham</option>
+          <option>Vaughan</option><option>Gatineau</option><option>Saskatoon</option><option>Longueuil</option>
+          <option>Kitchener</option><option>Burnaby</option><option>Windsor</option><option>Regina</option>
+          <option>Richmond</option><option>Burlington</option><option>Richmond Hill</option><option>Oakville</option>
+          <option>Sherbrooke</option><option>Saint John</option><option>St. John's</option><option>Victoria</option>
+          <option>Fredericton</option><option>Charlottetown</option><option>Yellowknife</option><option>Whitehorse</option>
+          <option>Iqaluit</option><option>Thunder Bay</option><option>Sudbury</option><option>Sault Ste. Marie</option>
+          <option>North Bay</option><option>Trois-Rivières</option><option>Toronto (Scarborough)</option>
+          <option>Toronto (North York)</option><option>Toronto (Etobicoke)</option><option>Montreal (Lachine)</option>
+          <option>Montreal (Verdun)</option><option>Vancouver (Surrey)</option><option>Vancouver (Burnaby)</option>
+        </select>
+      )}
+      {locType === 'province' && (
+        <select value={province} onChange={e=>setProvince(e.target.value)}>
+          <option value="">{getText('province','Select province...')}</option>
+          <option>Ontario</option><option>British Columbia</option><option>Quebec</option><option>Alberta</option>
+          <option>Manitoba</option><option>Saskatchewan</option><option>Nova Scotia</option><option>New Brunswick</option>
+          <option>Newfoundland and Labrador</option><option>Prince Edward Island</option>
+          <option>Yukon</option><option>Northwest Territories</option><option>Nunavut</option>
+        </select>
+      )}
+      <>
+        {locType !

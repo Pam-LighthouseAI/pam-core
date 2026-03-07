@@ -1,0 +1,6 @@
+Telephone: False
+Téléphone: True
+priorite: False
+priorité: True
+Acune: False
+Aucune: True

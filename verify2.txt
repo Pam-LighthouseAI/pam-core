@@ -1,0 +1,12 @@
+aboutTitle: "À propos",
+  aboutIntro: "Ma Voix Civique Canada est un outil gratuit et à but non lucratif conçu pour aider les citoyens canadiens à entrer en contact avec leurs représentants élus.",
+  aboutMissionTitle: "Notre mission",
+  aboutMissionText: "Nous croyons que chaque citoyen mérite de savoir qui représente ses intérêts et comment faire entendre sa voix. Notre mission est de simplifier le processus d'engagement civique pour tous les Canadiens.",
+  aboutHowTitle: "Comment ça fonctionne",
+  aboutHow1: "Entrez votre code postal ou votre ville pour trouver vos représentants",
+  aboutHow2: "Décrivez votre enjeu pour obtenir des conseils sur le bon niveau de gouvernement",
+  aboutHow3: "Rédigez une lettre personnelle avec notre modèle",
+  aboutHow4: "Contactez vos représentants directement par courriel ou par téléphone",
+  aboutDataTitle: "Sources des données",
+  aboutDataText: "Les données sur les représentants proviennent de l'API Represent d'OpenNorth, qui consolide les données d'Élections Canada, des bureaux électoraux provinciaux et des sources municipales.",
+  aboutAccuracy: "Les données fédérales et provinciales sont généralement à jour. Les données municipales peuvent

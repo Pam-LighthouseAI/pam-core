@@ -1,0 +1,3 @@
+Checking 275 nameFr fields...
+
+No accent issues found in nameFr fields!

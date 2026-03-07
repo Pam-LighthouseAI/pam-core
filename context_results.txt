@@ -1,0 +1,51 @@
+
+=== education (46 matches) ===
+  ...,
+    healthcare: "Soins de sant",
+    education: "ducation",
+    housing: "Logement et...
+  ... transit and zoning. Provincial manages education, healthcare, and highways. Federal deal...
+  ...d zoning. Provincial governments manage education, healthcare, highways, and other region...
+
+=== Education (7 matches) ===
+  ...},
+  { id:"education", icon:"", label:"Education", labelFr:"ducation", color:"#2563EB",...
+  ...res Nations et les Inuits"},
+    {name:"Education on reserves", nameFr:"ducation dans le...
+  ...tion: {
+    federal: { title: "National Education Programs", contact: "MP", items: ["Stud...
+
+=== securite (0 matches) ===
+
+=== donnees (0 matches) ===
+
+=== accessibilite (0 matches) ===
+
+=== dependances (0 matches) ===
+
+=== impots (0 matches) ===
+
+=== matiere (3 matches) ===
+  ...rivacy complaints", nameFr:"Plaintes en matiere de vie prive",primary:"federal",second...
+  ...l legal aid", nameFr:"Aide juridique en matiere criminelle",primary:"provincial",second...
+  ...crimination", nameFr:"Discrimination en matiere de logement",primary:"provincial",secon...
+
+=== benevolat (0 matches) ===
+
+=== ca (37 matches) ===
+  ...)} <a href="https://represent.opennorth.ca/" target="_blank" rel="noopener norefer...
+  ... 'Toronto': { url: 'https://www.toronto.ca/council/', name: 'Toronto City Council'...
+  ...eal': { url: 'https://ville.montreal.qc.ca/portal/page?_pageid=5798,42649578&_dad=...
+
+=== communaute (0 matches) ===
+
+=== reserves (1 matches) ===
+  ...t les Inuits"},
+    {name:"Education on reserves", nameFr:"ducation dans les rserves",...
+
+=== Reserve (2 matches) ===
+  ...es s'appliquent galement"},
+    {name:"Reserve land issues", nameFr:"Questions foncir...
+  ...ems: ["Status cards", "Treaty rights", "Reserve land", "First Nations education", "Non-...
+
+=== numerique (0 matches) ===

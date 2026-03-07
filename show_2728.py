@@ -1,0 +1,7 @@
+with open(r'C:\nanobot\instance3\workspace\my Civic voice version 3\MyCivicVoicev3.html', 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+
+# Show lines around 2728
+for i in range(2720, 2740):
+    if i < len(lines):
+        print(f'{i+1}: {lines[i].rstrip()}')

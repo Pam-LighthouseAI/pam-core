@@ -1,0 +1,87 @@
+import webbrowser
+import os
+
+html = """<!DOCTYPE html>
+<html>
+<head>
+<title>Pattern Bot</title>
+<style>
+body { font-family: Arial; background: #1a1a2e; color: white; text-align: center; padding: 50px; }
+h1 { color: #ff6b6b; }
+.grid { display: grid; grid-template-columns: repeat(3, 100px); gap: 10px; justify-content: center; margin: 30px; }
+.cell { width: 100px; height: 100px; background: #16213e; border: 2px solid #0f3460; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 40px; cursor: pointer; }
+.cell:hover { background: #0f3460; }
+.cell.selected { border-color: #e94560; box-shadow: 0 0 20px #e94560; }
+button { background: #e94560; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 5px; cursor: pointer; margin: 10px; }
+#message { font-size: 24px; margin: 20px; }
+#score { font-size: 20px; color: #00d9ff; }
+</style>
+</head>
+<body>
+<h1>Pattern Bot</h1>
+<p>Match the pattern!</p>
+<div id="score">Score: 0</div>
+<div id="message"></div>
+<div class="grid" id="patternGrid"></div>
+<div class="grid" id="playerGrid"></div>
+<button onclick="newRound()">New Pattern</button>
+<button onclick="checkMatch()">Check Match</button>
+<script>
+const symbols = ['*', '!', '#', '$', '%', '&', '+', '?'];
+let score = 0;
+function init() {
+    const patternGrid = document.getElementById('patternGrid');
+    const playerGrid = document.getElementById('playerGrid');
+    for (let i = 0; i < 9; i++) {
+        patternGrid.innerHTML += '<div class="cell" id="pattern' + i + '"></div>';
+        playerGrid.innerHTML += '<div class="cell" id="player' + i + '" onclick="toggle(' + i + ')"></div>';
+    }
+    newRound();
+}
+function newRound() {
+    for (let i = 0; i < 9; i++) {
+        if (Math.random() > 0.5) {
+            document.getElementById('pattern' + i).textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        } else {
+            document.getElementById('pattern' + i).textContent = '';
+        }
+        document.getElementById('player' + i).textContent = '';
+        document.getElementById('player' + i).classList.remove('selected');
+    }
+    document.getElementById('message').textContent = '';
+}
+function toggle(i) {
+    const cell = document.getElementById('player' + i);
+    if (cell.textContent === '') {
+        cell.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        cell.classList.add('selected');
+    } else {
+        cell.textContent = '';
+        cell.classList.remove('selected');
+    }
+}
+function checkMatch() {
+    let correct = 0;
+    for (let i = 0; i < 9; i++) {
+        const p = document.getElementById('pattern' + i).textContent;
+        const u = document.getElementById('player' + i).textContent;
+        if ((p !== '' && u !== '') || (p === '' && u === '')) correct++;
+    }
+    if (correct === 9) {
+        score += 10;
+        document.getElementById('score').textContent = 'Score: ' + score;
+        document.getElementById('message').textContent = 'Perfect! +10';
+    } else {
+        document.getElementById('message').textContent = correct + '/9 correct';
+    }
+}
+init();
+</script>
+</body>
+</html>"""
+
+filepath = os.path.join(os.path.dirname(__file__), 'pattern.html')
+with open(filepath, 'w') as f:
+    f.write(html)
+print(f'Created: {filepath}')
+webbrowser.open(filepath)
