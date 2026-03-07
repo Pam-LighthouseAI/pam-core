@@ -132,16 +132,18 @@ Infrastructure, Healthcare, Education, Housing, Environment, Safety, Employment,
 
 **Workspace Folder:** `C:\nanobot\instance3\workspace\MyCivicVoice_v4`
 
-**Status:** 🔄 IN PROGRESS
+**Status:** 🔄 IN PROGRESS - Deployment blocked by city_data.js 404
 
 **Feature:** 500-city searchable dropdown for Step 1
 
-**Progress (2026-03-07 16:46):**
-- ✅ Job 1: Created `city_data.js` with ~200 Canadian cities (name, province, population, repSet)
-- ✅ Job 2: Built searchable dropdown UI — added `citySearch`/`showCityDropdown` state, replaced hardcoded `<select>` with input + filtered dropdown
+**Progress (2026-03-07 16:55):**
+- ✅ Job 1: Created `city_data.js` with 472 Canadian cities (name, province, population, repSet)
+- ✅ Job 2: Build searchable dropdown UI — added `citySearch`/`showCityDropdown` state, replaced hardcoded `<select>` with input + filtered dropdown
 - ✅ Job 3: Wired up city lookup logic — `CITY_DATA.find()` integrated at lines 3485, 3494, 3756, 3767
-- 🔄 Job 4: Add provincial/federal finder links (IN PROGRESS - PROVINCE_FINDERS defined but NOT wired to UI)
-- ⏳ Job 5: Integrate into v4 HTML and test
+- ✅ Job 4: Add provincial/federal finder links — PROVINCE_FINDERS defined in city_data.js
+- ✅ Job 5: Integrate into v4 HTML and test — COMPLETE (2026-03-07 16:50)
+- ✅ Alphabetical sorting — Cities and provinces now sorted alphabetically
+- ✅ Finder links wired — Federal/provincial rep cards show finder links when `isFinder: true`
 
 **Searchable Dropdown Features:**
 - Filters cities as user types (minimum 2 characters)
@@ -150,37 +152,29 @@ Infrastructure, Healthcare, Education, Housing, Environment, Safety, Employment,
 - Province displayed under each city name
 - **Alphabetical sorting added (16:45)** — searchCities() now sorts results alphabetically by city name
 
+**City Data File:** `city_data.js` — 472 Canadian cities with repSet mapping
+
 **Approach:**
-- Build functionality first with existing ~200 cities from city_data.js
+- Build functionality first with existing ~472 cities from city_data.js
 - Expand city list later
 - City lookup returns: Mayor/Council (exact) + Provincial/Federal finder links (generic)
-
-**Cron Jobs Created:**
-- `v4-job1-city-data` — Create city data file
-- `v4-job2-dropdown-ui` — Build searchable dropdown UI
-- `v4-job3-lookup-logic` — Wire up city lookup logic
-- `v4-job4-finder-links` — Add provincial/federal finder links
-- `v4-job5-integrate-test` — Integrate into v4 HTML and test
 
 **City Lookup Design:**
 - User selects city → Get exact mayor/council via `representative_set_name`
 - Provincial/Federal → Generic finder links (not exact reps)
 - Three lookup paths: Postal Code (exact all levels), City (exact municipal + links), Province (links only)
 
-**Status Check (2026-03-07 16:50):**
-- ✅ Job 5 COMPLETE — City lookup fully integrated into v4 HTML
-- cityRepSet state added for municipal representative lookup
-- City selection now sets repSet and province for finder links
-- Pre-fetch and Step 3 fetch logic updated to use repSet for municipal reps
-- Start Over buttons clear cityRepSet
-- Location type buttons clear relevant state when switching
-- Files deployed to D:\MyCivicVoice_Deploy\ (index.html, city_data.js, escalation_data.js)
+**Current Issue (2026-03-07 16:55):**
+- `city_data.js` returns 404 on Netlify
+- File exists in `D:\MyCivicVoice_Deploy\city_data.js`
+- Git tracks file in `MyCivicVoice_v4/` folder
+- index.html references `<script src="MyCivicVoice_v4/city_data.js"></script>`
+- Netlify may be serving different content (possibly Vite build with `/src/main.jsx`)
+- Investigating root cause
 
-**Outstanding Work (16:46):**
-- Province dropdown needs alphabetical sorting (hardcoded in arbitrary order)
-- PROVINCE_FINDERS (bilingual finder links) defined in city_data.js but NOT wired to UI
-- isFinder: true flag set for federal/provincial reps but not displayed
-- Need to use PROVINCE_FINDERS instead of or alongside PROVINCIAL_BACKUP_LINKS
+**Outstanding Work:**
+- Fix city_data.js 404 on Netlify
+- Verify Netlify deployment configuration
 
 ---
 
@@ -205,6 +199,8 @@ Infrastructure, Healthcare, Education, Housing, Environment, Safety, Employment,
 **Encoding Issues:** Windows terminal displays UTF-8 characters incorrectly. Use Python with UTF-8 encoding for French content. Double-encoding (`\xc3\x83` sequences) requires careful decoding/encoding fixes.
 
 **Netlify Deployment:** Must deploy entire folder, not just index.html. External JS files (escalation_data.js) must be deployed alongside HTML.
+
+**Git Tracking Issue:** `city_data.js` tracked in `MyCivicVoice_v4/` subfolder but referenced from root in index.html — causing deployment path mismatch.
 
 ---
 
@@ -262,3 +258,4 @@ Infrastructure, Healthcare, Education, Housing, Environment, Safety, Employment,
 - **City lookup approach:** Build functionality first with existing cities, expand list later
 - **Pacing:** Daniel asked to "go slow" during v4 development (2026-03-07 16:46) — important pacing note
 - **Focus check:** Daniel noted Pam was "going in circles" during v4 work (2026-03-07 16:42) — reminder to pause and assess status when making repetitive edits
+- **"Way to go. You did it?"** (2026-03-07 16:55) — Daniel's sarcastic encouragement when deployment hit 404 issue

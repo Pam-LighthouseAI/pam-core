@@ -478,7 +478,168 @@ const CITY_DATA = [
   { name: "Cambridge Bay", province: "NU", repSet: "Cambridge Bay Town Council" },
 ];
 
+// Province/Territory Finder Links for Provincial and Federal Representatives
+// Each province has official links to find representatives by postal code
+const PROVINCE_FINDERS = {
+  'ON': {
+    provincial: {
+      en: 'https://www.ola.org/en/members/current',
+      fr: 'https://www.ola.org/fr/membres/actuels',
+      label: { en: 'Ontario Legislative Assembly', fr: 'Assemblée législative de l\'Ontario' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'QC': {
+    provincial: {
+      en: 'https://www.assnat.qc.ca/en/deputes/index.html',
+      fr: 'https://www.assnat.qc.ca/fr/deputes/index.html',
+      label: { en: 'National Assembly of Quebec', fr: 'Assemblée nationale du Québec' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'BC': {
+    provincial: {
+      en: 'https://www.leg.bc.ca/learn-about-our-legislature/members-of-the-legislative-assembly',
+      fr: 'https://www.leg.bc.ca/learn-about-our-legislature/members-of-the-legislative-assembly',
+      label: { en: 'BC Legislative Assembly', fr: 'Assemblée législative de la C.-B.' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'AB': {
+    provincial: {
+      en: 'https://www.assembly.ab.ca/net/index.aspx?p=mla_home',
+      fr: 'https://www.assembly.ab.ca/net/index.aspx?p=mla_home',
+      label: { en: 'Alberta Legislative Assembly', fr: 'Assemblée législative de l\'Alberta' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'SK': {
+    provincial: {
+      en: 'https://www.legassembly.sk.ca/mlas/',
+      fr: 'https://www.legassembly.sk.ca/mlas/',
+      label: { en: 'Saskatchewan Legislative Assembly', fr: 'Assemblée législative de la Saskatchewan' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'MB': {
+    provincial: {
+      en: 'https://www.gov.mb.ca/legislature/members/mla_list.html',
+      fr: 'https://www.gov.mb.ca/legislature/members/mla_list.html',
+      label: { en: 'Manitoba Legislative Assembly', fr: 'Assemblée législative du Manitoba' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'NB': {
+    provincial: {
+      en: 'https://www.legnb.ca/en/members/current',
+      fr: 'https://www.legnb.ca/fr/membres/actuels',
+      label: { en: 'New Brunswick Legislative Assembly', fr: 'Assemblée législative du Nouveau-Brunswick' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'NS': {
+    provincial: {
+      en: 'https://nslegislature.ca/members/',
+      fr: 'https://nslegislature.ca/members/',
+      label: { en: 'Nova Scotia Legislative Assembly', fr: 'Assemblée législative de la Nouvelle-Écosse' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'PE': {
+    provincial: {
+      en: 'https://www.assembly.pe.ca/members',
+      fr: 'https://www.assembly.pe.ca/members',
+      label: { en: 'Prince Edward Island Legislative Assembly', fr: 'Assemblée législative de l\'Île-du-Prince-Édouard' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'NL': {
+    provincial: {
+      en: 'https://www.assembly.nl.ca/members/',
+      fr: 'https://www.assembly.nl.ca/members/',
+      label: { en: 'Newfoundland and Labrador Legislative Assembly', fr: 'Assemblée législative de Terre-Neuve-et-Labrador' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'YT': {
+    provincial: {
+      en: 'https://yukonassembly.ca/mlas',
+      fr: 'https://yukonassembly.ca/mlas',
+      label: { en: 'Yukon Legislative Assembly', fr: 'Assemblée législative du Yukon' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'NT': {
+    provincial: {
+      en: 'https://www.ntassembly.ca/members',
+      fr: 'https://www.ntassembly.ca/members',
+      label: { en: 'Northwest Territories Legislative Assembly', fr: 'Assemblée législative des Territoires du Nord-Ouest' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  },
+  'NU': {
+    provincial: {
+      en: 'https://www.nunatsiaq.com/legislative-assembly',
+      fr: 'https://www.nunatsiaq.com/legislative-assembly',
+      label: { en: 'Nunavut Legislative Assembly', fr: 'Assemblée législative du Nunavut' }
+    },
+    federal: {
+      en: 'https://www.ourcommons.ca/Members/en/search',
+      fr: 'https://www.noscommunes.ca/Membres/fr/recherche',
+      label: { en: 'House of Commons', fr: 'Chambre des communes' }
+    }
+  }
+};
+
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { CITY_DATA };
+  module.exports = { CITY_DATA, PROVINCE_FINDERS };
 }
